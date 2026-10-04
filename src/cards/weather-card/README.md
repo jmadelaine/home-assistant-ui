@@ -23,7 +23,7 @@ type: custom:weather-card
 | `name`               | string  | none                         | Title under the condition.                                                  |
 | `temperature_entity` | string  | none                         | Sensor whose temperature replaces the forecast's, e.g. your own thermometer. |
 | `has_details`        | boolean | `false`                      | Show wind speed and direction, pressure and humidity.                       |
-| `has_hourly_forecast` | boolean | `false`                     | Show each hour's temperature and weather.                                   |
+| `has_hourly_forecast` | boolean | `false`                     | Show each hour's temperature as a line, and its weather.                    |
 | `has_rain_chart`     | boolean | `false`                      | Show a bar for each hour's rain.                                            |
 | `has_daily_forecast` | boolean | `false`                      | Show a tile for each day ahead.                                             |
 | `hours`              | number  | `24`                         | How many hours ahead the headline and hourly panel look.                    |
@@ -47,8 +47,11 @@ Home Assistant (**Settings → System → General**). Unit values are not case-s
   wind is a strong breeze or more: 10.8 m/s, 39 km/h, 24 mph.
 - The hourly forecast and rain chart share one panel and one row of times, so
   each temperature and icon sits above that hour's rain. Turn on either or both.
-- When the card is too narrow for every hour's temperature and icon, it shows
-  every second or third hour. The rain bars always show every hour.
+- The temperature line's height covers at least 8°C (14°F), so a day that
+  barely changes looks nearly flat. The line never curves past the forecast values.
+- When the card is too narrow for every hour's temperature and icon, it labels
+  every second or third hour. The line and the rain bars always cover every
+  hour, and hovering an hour shows its temperature.
 - The rain chart's scale is at least 2.5 mm per hour, so drizzle doesn't look like a downpour.
 - Today's high and low cover the rest of today.
 - The card fetches the forecast again when Met.no says it has expired, which is

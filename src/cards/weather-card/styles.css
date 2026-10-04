@@ -86,22 +86,63 @@ ha-card {
   grid-auto-columns: minmax(0, 1fr);
   gap: 3px;
 }
-.temps,
 .conditions,
 .labels {
   justify-items: center;
   white-space: nowrap;
 }
+
+/* Temperature line. The SVG and the values share one vertical scale: the plot
+   runs from --plot-top (room for the values above the highest point) to
+   --plot-bottom above the band's bottom edge. */
+.temp-chart {
+  --plot-top: 20px;
+  --plot-bottom: 6px;
+  position: relative;
+  height: 68px;
+}
+.temp-line {
+  position: absolute;
+  inset: var(--plot-top) 0 var(--plot-bottom);
+  width: 100%;
+  height: calc(100% - var(--plot-top) - var(--plot-bottom));
+  overflow: visible;
+}
+.temp-line {
+  color: var(--primary-text-color);
+}
+.temp-line .line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
 .temps {
+  position: absolute;
+  inset: 0;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
+}
+.temps > span {
+  position: relative;
+  --y: calc(var(--plot-top) + (1 - var(--level)) * (100% - var(--plot-top) - var(--plot-bottom)));
+}
+.temps .value {
+  position: absolute;
+  left: 50%;
+  top: var(--y);
+  transform: translate(-50%, calc(-100% - 6px));
+  white-space: nowrap;
 }
 .conditions {
   --icon-size: 18px;
   margin-bottom: 2px;
 }
-/* Hours left out when the columns are too narrow */
-.skip {
+/* Hours left out when the columns are too narrow. Only their contents hide,
+   so each hour's tooltip still works. */
+.skip > *,
+.labels .skip {
   visibility: hidden;
 }
 .bars {

@@ -175,6 +175,42 @@ function parseMet(json) {
   return { hours, days: [...days.values()].slice(0, -1) };
 }
 
+// The temperature line's vertical range is at least this, so a day that barely
+// changes draws nearly flat instead of as a mountain
+const MIN_TEMPERATURE_RANGE = 8; // °C
+
+// SVG path through the points that never overshoots them (monotone cubic,
+// Fritsch–Carlson), so the curve never shows a temperature that isn't forecast.
+function smoothPath(points) {
+  const n = points.length;
+  if (n < 2) return "";
+  const dx = [];
+  const slope = [];
+  for (let i = 0; i < n - 1; i++) {
+    dx[i] = points[i + 1][0] - points[i][0];
+    slope[i] = (points[i + 1][1] - points[i][1]) / dx[i];
+  }
+  const tangent = [slope[0]];
+  for (let i = 1; i < n - 1; i++) {
+    tangent[i] =
+      slope[i - 1] * slope[i] <= 0
+        ? 0
+        : (3 * (dx[i - 1] + dx[i])) /
+          ((2 * dx[i] + dx[i - 1]) / slope[i - 1] + (dx[i] + 2 * dx[i - 1]) / slope[i]);
+  }
+  tangent[n - 1] = slope[n - 2];
+
+  const r = (v) => Math.round(v * 100) / 100;
+  let d = `M${r(points[0][0])},${r(points[0][1])}`;
+  for (let i = 0; i < n - 1; i++) {
+    const [x0, y0] = points[i];
+    const [x1, y1] = points[i + 1];
+    const h = dx[i] / 3;
+    d += `C${r(x0 + h)},${r(y0 + tangent[i] * h)} ${r(x1 - h)},${r(y1 - tangent[i + 1] * h)} ${r(x1)},${r(y1)}`;
+  }
+  return d;
+}
+
 // Finds the first spell of rain, sleet or snow in the coming hours.
 function rainSpell(hours) {
   const wet = hours.map((h) => h.rain > 0);
@@ -316,7 +352,19 @@ class WeatherCard extends HTMLElement {
           <span class="icon"></span><span class="text"></span><span class="extra secondary"></span>
         </div>
         <div class="hourly surface">
-          <div class="temps"></div>
+          <div class="temp-chart">
+            <svg class="temp-line" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="temp-fade" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="currentColor" stop-opacity="0.16"></stop>
+                  <stop offset="1" stop-color="currentColor" stop-opacity="0"></stop>
+                </linearGradient>
+              </defs>
+              <path class="area" fill="url(#temp-fade)"></path>
+              <path class="line" vector-effect="non-scaling-stroke"></path>
+            </svg>
+            <div class="temps"></div>
+          </div>
           <div class="conditions"></div>
           <div class="bars"></div>
           <div class="labels secondary"></div>
@@ -341,7 +389,7 @@ class WeatherCard extends HTMLElement {
 
     const gap = parseFloat(getComputedStyle(labels).columnGap) || 0;
     const column = (this._hourlyWidth - gap * (count - 1)) / count;
-    const step = root.querySelector(".temps").hidden ? 1 : Math.ceil(MIN_HOUR_WIDTH / column);
+    const step = root.querySelector(".temp-chart").hidden ? 1 : Math.ceil(MIN_HOUR_WIDTH / column);
     const labelStep = step * Math.max(1, Math.round(count / 4 / step));
 
     const thin = (row, every) =>
@@ -453,7 +501,7 @@ class WeatherCard extends HTMLElement {
     const forecastShown = hours.length > 0 && !!c.has_hourly_forecast;
     const rainShown = hours.length > 0 && !!c.has_rain_chart;
     $(".hourly").hidden = !forecastShown && !rainShown;
-    $(".temps").hidden = !forecastShown;
+    $(".temp-chart").hidden = !forecastShown;
     $(".conditions").hidden = !forecastShown;
     $(".bars").hidden = !rainShown;
     const cells = (fill) =>
@@ -464,7 +512,36 @@ class WeatherCard extends HTMLElement {
       });
 
     if (forecastShown) {
-      $(".temps").replaceChildren(...cells((cell, h) => (cell.textContent = degrees(h.temperature))));
+      // One column per hour: x is the column's center, y is 0 (coldest) to 1 (warmest)
+      const temps = hours.map((h) => h.temperature);
+      let low = Math.min(...temps);
+      let high = Math.max(...temps);
+      if (high - low < MIN_TEMPERATURE_RANGE) {
+        const middle = (high + low) / 2;
+        low = middle - MIN_TEMPERATURE_RANGE / 2;
+        high = middle + MIN_TEMPERATURE_RANGE / 2;
+      }
+      const level = (t) => (t - low) / (high - low);
+      const points = hours.map((h, i) => [i + 0.5, (1 - level(h.temperature)) * 100]);
+      const line = smoothPath(points);
+      $(".temp-line").setAttribute("viewBox", `0 0 ${hours.length} 100`);
+      $(".temp-line .line").setAttribute("d", line);
+      $(".temp-line .area").setAttribute(
+        "d",
+        line && `${line}L${points.at(-1)[0]},100L${points[0][0]},100Z`,
+      );
+
+      // Each hour's value sits just above the line; thinning hides some of them
+      $(".temps").replaceChildren(
+        ...cells((cell, h) => {
+          cell.style.setProperty("--level", level(h.temperature));
+          cell.title = `${time(h.time)} · ${degrees(h.temperature)}`;
+          const value = document.createElement("span");
+          value.className = "value";
+          value.textContent = degrees(h.temperature);
+          cell.append(value);
+        }),
+      );
       $(".conditions").replaceChildren(
         ...cells((cell, h) => showCondition(cell, h.condition, h.isNight)),
       );
