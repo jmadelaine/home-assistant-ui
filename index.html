@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Card Playground</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/dev/ha-theme.css" />
+    <link rel="stylesheet" href="/dev/playground.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <h1>Theme</h1>
+      <nav id="theme-list"></nav>
+      <h1>Cards</h1>
+      <nav id="card-list"></nav>
+    </aside>
+
+    <main>
+      <header class="toolbar">
+        <div class="title">
+          <h2 id="card-name"></h2>
+          <code id="card-type"></code>
+        </div>
+        <label class="control" id="width-control">
+          Width
+          <input id="width" type="range" min="240" max="640" step="10" />
+          <output id="width-value"></output>
+        </label>
+        <label class="control">
+          Theme
+          <select id="theme">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+      </header>
+
+      <theme-page id="theme-page" hidden></theme-page>
+
+      <div class="layout" id="card-view">
+        <section class="stage-column">
+          <div class="stage"><div id="card-host"></div></div>
+          <article id="docs" class="docs"></article>
+        </section>
+
+        <section class="panels">
+          <div class="panel">
+            <header>
+              Config
+              <select id="examples" aria-label="Load an example"></select>
+            </header>
+            <textarea id="yaml" spellcheck="false" autocapitalize="off" aria-label="Card YAML"></textarea>
+            <div id="notice" class="notice" hidden></div>
+          </div>
+
+          <div class="panel">
+            <header>Mock entities</header>
+            <div id="entities"></div>
+          </div>
+
+          <div class="panel">
+            <header>
+              Service calls &amp; events
+              <button id="clear-log" type="button">Clear</button>
+            </header>
+            <ol id="log"></ol>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script type="module" src="/dev/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,41 @@
+ha-card {
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.name,
+.date {
+  font-size: var(--font-size-s);
+}
+.name:empty,
+.date:empty {
+  display: none;
+}
+.time {
+  font-size: var(--font-size-l);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.1em;
+}
+.sec {
+  font-size: 0.5em;
+  margin-top: 0.23em;
+}
+
+ha-card.large {
+  padding: 12px 0;
+  gap: 4px;
+}
+.large .name {
+  font-size: var(--font-size-m);
+}
+.large .time {
+  font-size: 72px;
+}
+.large .date {
+  font-size: var(--font-size-l);
+}

@@ -1,0 +1,179 @@
+ha-card {
+  padding: var(--card-padding);
+  display: grid;
+  gap: var(--gap);
+}
+
+/* Current conditions */
+.now {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--gap);
+  --icon-size: 52px;
+}
+.temp {
+  font-size: 40px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.range,
+.name {
+  font-size: var(--font-size-s);
+}
+.about {
+  text-align: right;
+}
+.condition {
+  font-size: var(--font-size-m);
+}
+.range:empty,
+.name:empty {
+  display: none;
+}
+
+/* Wind, pressure, humidity */
+.details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: var(--font-size-s);
+  --icon-size: 18px;
+}
+.details > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* "Rain from 15:00 · 3 mm" */
+.headline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-medium);
+  --icon-size: 20px;
+}
+.headline .icon {
+  opacity: var(--secondary-opacity);
+}
+.headline.wet .icon {
+  opacity: 1;
+}
+.headline .extra {
+  font-weight: normal;
+}
+.headline .extra:not(:empty)::before {
+  content: "· ";
+}
+
+/* Hourly panel: temperatures and icons, rain bars, times. Every row has one
+   column per hour, so they line up. */
+.hourly {
+  display: grid;
+  gap: 6px;
+  padding: 10px 10px 6px;
+}
+.temps,
+.conditions,
+.bars,
+.labels {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 3px;
+}
+.temps,
+.conditions,
+.labels {
+  justify-items: center;
+  white-space: nowrap;
+}
+.temps {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.conditions {
+  --icon-size: 18px;
+  margin-bottom: 2px;
+}
+/* Hours left out when the columns are too narrow */
+.skip {
+  visibility: hidden;
+}
+.bars {
+  height: 56px;
+  align-items: end;
+}
+.bar {
+  min-height: 3px;
+  border-radius: 3px;
+  color: var(--weather-rain);
+  background: currentColor;
+}
+.bar.dry {
+  color: inherit;
+  opacity: 0.12;
+}
+.labels {
+  font-size: 11px;
+}
+
+/* Daily strip */
+.days {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+.day {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 8px 2px;
+  font-size: var(--font-size-s);
+  --icon-size: 26px;
+}
+.day .high {
+  font-weight: var(--font-weight-medium);
+}
+.day .wet {
+  min-height: 1.3em;
+  font-size: 12px;
+  color: var(--weather-rain);
+  white-space: nowrap;
+}
+
+/* Colors by condition (tokens in theme.css), so the weather reads at a glance.
+   Last, so they win over the rules above. */
+[data-condition="sunny"],
+[data-condition="partlycloudy"] {
+  color: var(--weather-sun);
+}
+[data-condition="clear-night"],
+[data-condition="partlycloudy"][data-night] {
+  color: var(--weather-night);
+}
+[data-condition="cloudy"],
+[data-condition="fog"] {
+  color: var(--weather-cloud);
+}
+[data-condition="rainy"] {
+  color: var(--weather-rain);
+}
+[data-condition="pouring"] {
+  color: var(--weather-pouring);
+}
+[data-condition="lightning-rainy"] {
+  color: var(--weather-storm);
+}
+[data-condition="snowy"],
+[data-condition="snowy-rainy"] {
+  color: var(--weather-snow);
+}
+[data-condition="windy"] {
+  color: var(--weather-wind);
+}

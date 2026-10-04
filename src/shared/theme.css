@@ -1,0 +1,110 @@
+/*
+ * Shared look for every card. Adopted into each card's shadow root ahead of
+ * the card's own styles, so a card can override any of it.
+ *
+ * Colors come from the active Home Assistant theme; the fallbacks match the
+ * default light theme.
+ */
+
+:host {
+  display: block;
+
+  /* Spacing */
+  --gap: 12px;
+  --card-padding: 12px;
+
+  /* Shape */
+  --radius: 12px;
+
+  /* Color */
+  --fill: var(--secondary-background-color, #e5e5e5);
+  --accent: var(--primary-color, #03a9f4);
+  --danger: var(--error-color, #db4437);
+
+  /* Weather colors. A Home Assistant theme can set e.g. weather-sun-color. */
+  --weather-sun: var(--weather-sun-color, #f2a516);
+  --weather-night: var(--weather-night-color, #7f8cc9);
+  --weather-cloud: var(--weather-cloud-color, var(--secondary-text-color, #727272));
+  --weather-rain: var(--weather-rain-color, #3d9be9);
+  --weather-pouring: var(--weather-pouring-color, #2c6fd1);
+  --weather-storm: var(--weather-storm-color, #8e5bd8);
+  --weather-snow: var(--weather-snow-color, #2e9cbf);
+  --weather-wind: var(--weather-wind-color, #1e9488);
+
+  /* Text */
+  --font-size-s: 14px;
+  --font-size-m: 18px;
+  --font-size-l: 24px;
+  --font-weight-medium: 500;
+  --secondary-opacity: 0.625;
+
+  /* Icons */
+  --icon-size: 24px;
+}
+
+/* reicon icons; color follows the text */
+.reicon {
+  display: block;
+  flex: none;
+  width: var(--icon-size);
+  height: var(--icon-size);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Text that sits below the main content: labels, dates, units */
+.secondary {
+  opacity: var(--secondary-opacity);
+}
+
+/* Buttons: no chrome by default. Add .key for a filled, rounded key. */
+button {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: none;
+  color: var(--primary-text-color);
+  font: inherit;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background 0.12s;
+}
+button:active {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+button:disabled {
+  cursor: default;
+}
+
+/* A filled, rounded panel. .key is the same look for buttons. */
+.surface,
+.key {
+  background: var(--fill);
+  border-radius: var(--radius);
+}
+
+/* Destructive actions, e.g. turning a device off */
+.danger {
+  color: var(--danger);
+}
+.danger:active {
+  background: color-mix(in srgb, var(--danger) 25%, transparent);
+}
+
+/* Dims a section and makes it inert, e.g. while the device is off */
+.inactive {
+  opacity: 0.35;
+  pointer-events: none;
+}

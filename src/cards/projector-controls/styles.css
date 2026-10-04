@@ -1,0 +1,57 @@
+ha-card {
+  padding: var(--card-padding);
+  --side-gap: 8px;
+  --icon-size: 28px;
+}
+
+/* One cell is a quarter of the width: 1 for the side column, 3 for the arrows */
+.box {
+  container-type: inline-size;
+  max-width: 360px;
+  margin: 0 auto;
+}
+.wrap {
+  --cell: calc((100cqw - var(--gap)) / 4);
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: var(--cell) calc(var(--cell) * 3);
+}
+.left,
+.side {
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.2s;
+}
+.left {
+  gap: var(--gap);
+}
+.side {
+  gap: var(--side-gap);
+}
+.side .key {
+  flex: 1;
+}
+.select {
+  height: var(--cell);
+}
+
+/* Arrows: one surface, 3x3, corners and center are dead space */
+.dpad {
+  display: grid;
+  grid-template: repeat(3, var(--cell)) / repeat(3, var(--cell));
+  background: var(--fill);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* Power: a slim full-width button, set apart from the navigation keys */
+.power {
+  grid-column: 1 / -1;
+  height: calc(var(--cell) * 0.6);
+  grid-auto-flow: column;
+  justify-content: center;
+  gap: 8px;
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-medium);
+  --icon-size: 22px;
+}
