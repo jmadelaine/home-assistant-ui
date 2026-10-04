@@ -121,6 +121,7 @@ function select(type) {
     onUpdate: (hass) => mock === m && applyHass(hass),
     onCall: ({ domain, service, data, target }) =>
       log("service", `${domain}.${service}`, { ...data, ...target }),
+    onApi: ({ method, path }) => log("api", method, decodeURIComponent(path)),
   });
   mock = m;
   renderEntities();

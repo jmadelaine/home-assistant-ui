@@ -242,7 +242,8 @@ main {
 #log .event {
   color: var(--accent-color);
 }
-#log .fetch {
+#log .fetch,
+#log .api {
   color: var(--success-color);
 }
 #log .detail {

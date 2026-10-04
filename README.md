@@ -5,8 +5,10 @@ Custom Lovelace cards with a shared look. Every card ships in one bundle,
 
 | Card                                                        | Type                        |
 | ----------------------------------------------------------- | --------------------------- |
-| [Projector Controls](src/cards/projector-controls/README.md) | `custom:projector-controls` |
+| [Agenda](src/cards/agenda-card/README.md)                     | `custom:agenda-card`        |
 | [Date & Time](src/cards/datetime-card/README.md)             | `custom:datetime-card`      |
+| [Projector Controls](src/cards/projector-controls/README.md) | `custom:projector-controls` |
+| [Server](src/cards/server-card/README.md)                     | `custom:server-card`        |
 | [Weather](src/cards/weather-card/README.md)                   | `custom:weather-card`       |
 
 ## Development

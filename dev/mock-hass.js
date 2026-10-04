@@ -16,9 +16,11 @@ const defaultServices = {
 // `preview` is a card's preview.js export:
 //   entities: { "light.x": "on" | { state, attributes, options } }
 //   services: { "domain.service": ({ data, entityIds, setState, states }) => {} }
-// onUpdate(hass) runs after every state change; onCall(call) for every service call.
-export function createMockHass(preview = {}, { onUpdate, onCall, darkMode = false } = {}) {
-  const { entities = {}, services = {} } = preview;
+//   api: (method, path, hass) => response, for hass.callApi (Home Assistant's REST API)
+// onUpdate(hass) runs after every state change; onCall(call) for every service
+// call; onApi(request) for every callApi.
+export function createMockHass(preview = {}, { onUpdate, onCall, onApi, darkMode = false } = {}) {
+  const { entities = {}, services = {}, api } = preview;
   const states = {};
   let hass;
 
@@ -53,9 +55,17 @@ export function createMockHass(preview = {}, { onUpdate, onCall, darkMode = fals
     handler?.({ domain, service, data, target, entityIds, setState, states });
   };
 
+  const callApi = async (method, path) => {
+    onApi?.({ method, path });
+    const response = api?.(method, path, hass);
+    if (response === undefined) throw new Error(`No mock for ${method} ${path} in preview.js api`);
+    return response;
+  };
+
   const build = () => ({
     states: { ...states },
     callService,
+    callApi,
     themes: { darkMode, theme: "default", themes: {} },
     selectedTheme: null,
     language: "en",

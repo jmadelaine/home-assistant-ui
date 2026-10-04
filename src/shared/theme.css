@@ -31,6 +31,11 @@
   --weather-snow: var(--weather-snow-color, #2e9cbf);
   --weather-wind: var(--weather-wind-color, #1e9488);
 
+  /* Calendar colors. Only three, so every pair stays distinct, even for colorblind viewers; a theme can set e.g. calendar-1-color. */
+  --calendar-1: var(--calendar-1-color, light-dark(#2a78d6, #3987e5));
+  --calendar-2: var(--calendar-2-color, light-dark(#eb6834, #d95926));
+  --calendar-3: var(--calendar-3-color, light-dark(#1baf7a, #199e70));
+
   /* Text */
   --font-size-s: 14px;
   --font-size-m: 18px;

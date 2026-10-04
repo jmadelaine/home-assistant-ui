@@ -1,0 +1,118 @@
+ha-card {
+  padding: var(--card-padding);
+  display: grid;
+  gap: var(--gap);
+}
+.title {
+  font-size: var(--font-size-m);
+}
+.title:empty,
+.legend:empty,
+.failed:empty {
+  display: none;
+}
+
+.days {
+  display: grid;
+  gap: var(--gap);
+}
+
+/* "Today", "Tomorrow", "Wed, Oct 8 · in 3 days" */
+.heading {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 2px;
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-medium);
+}
+.countdown {
+  font-weight: normal;
+}
+
+/* One event: [calendar dot] time | what | [chevron]. Rows with a description
+   are buttons, so they get the shared press and focus states. */
+.event {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr) auto;
+  align-items: start;
+  justify-items: stretch;
+  gap: 10px;
+  width: calc(100% + 16px);
+  margin: 0 -8px;
+  padding: 7px 8px;
+  border-radius: var(--radius);
+  font-size: var(--font-size-s);
+  text-align: left;
+}
+.with-dots .event {
+  grid-template-columns: 8px 68px minmax(0, 1fr) auto;
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+}
+.when,
+.what {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.main {
+  font-variant-numeric: tabular-nums;
+}
+.sub {
+  font-size: 12px;
+}
+.summary {
+  font-weight: var(--font-weight-medium);
+}
+.sub:empty,
+.location:empty {
+  display: none;
+}
+.description {
+  display: none;
+  margin-top: 4px;
+  font-size: 13px;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.open .description {
+  display: block;
+}
+.event .reicon {
+  --icon-size: 18px;
+  opacity: var(--secondary-opacity);
+  transition: transform 0.2s;
+}
+.open .reicon {
+  transform: rotate(180deg);
+}
+
+.empty {
+  padding: 8px 0;
+  text-align: center;
+  font-size: var(--font-size-s);
+}
+
+/* Which color is which calendar */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 12px;
+}
+.legend > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend .dot {
+  margin-top: 0;
+}
+.failed {
+  font-size: 12px;
+}
