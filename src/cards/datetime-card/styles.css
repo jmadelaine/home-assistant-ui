@@ -27,7 +27,7 @@ ha-card {
 }
 
 ha-card.large {
-  padding: 6px 0 12px;
+  padding: 12px 0;
 }
 .large .name {
   font-size: var(--font-size-m);
