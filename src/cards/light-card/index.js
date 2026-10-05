@@ -220,8 +220,8 @@ class LightCard extends HTMLElement {
     slider.querySelector(".value span").textContent = text;
   }
 
-  // Shows the name, lights up the card and tints the controls with the light's
-  // color while it's on, and dims the controls while it's unreachable. The options stay available, since
+  // Shows the name, lights up the card in the light's color while it's on, and
+  // dims the controls while it's unreachable. The options stay available, since
   // the dialog still shows an unreachable light's settings and history.
   _sync() {
     const entity = this._hass?.states?.[this.config.entity];
@@ -237,12 +237,12 @@ class LightCard extends HTMLElement {
     const card = root.querySelector("ha-card");
     card.classList.toggle("unavailable", this._unavailable);
     card.classList.toggle("on", isOn);
-    const controls = root.querySelector(".controls");
-    controls.classList.toggle("inactive", this._unavailable);
+    card.classList.toggle("dark", !!this._hass?.themes?.darkMode);
     const colored = isOn && !!attrs.rgb_color;
-    controls.classList.toggle("colored", colored);
-    if (colored) controls.style.setProperty("--light", `rgb(${attrs.rgb_color})`);
-    else controls.style.removeProperty("--light");
+    card.classList.toggle("colored", colored);
+    if (colored) card.style.setProperty("--light", `rgb(${attrs.rgb_color})`);
+    else card.style.removeProperty("--light");
+    root.querySelector(".controls").classList.toggle("inactive", this._unavailable);
     root.querySelector(".options").setAttribute("aria-label", `${name} options`);
 
     const favorite = root.querySelector(".favorite");

@@ -23,8 +23,10 @@ entity: light.bedroom
 - **Tap anywhere on the card** to toggle the light, except on the brightness
   bar and the two keys, which do their own thing. Turning it on
   brings back its last brightness. While it's on, the bulb above the name
-  fills in, the card brightens, and the color key's dot and the
-  bar take the light's color.
+  fills in and the whole card takes the light's color: the bulb, the color
+  key's dot and the bar in it, and the card and keys in dimmer tints of it.
+  A light that doesn't report a color, such as a dimmable white bulb, just
+  brightens the card.
 - **Tap the color key** to switch to the next of the light's
   favorite colors. After the last favorite it goes back to the first. While
   the light is off, it just turns it on in the color it had. Its dot shows the

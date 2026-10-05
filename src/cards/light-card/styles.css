@@ -14,19 +14,36 @@ ha-card.unavailable {
   cursor: default;
 }
 /* The card lights up with the light. On a light theme it's dimmed while the
-   light is off and plain while it's on; on a dark theme it's plain while off
-   and a little lighter while on, keys and the bar's track too, so they still
-   stand out from it. */
+   light is off and plain while it's on; on a dark theme (.dark, from Home
+   Assistant's dark mode) it's plain while off and a little lighter while on,
+   keys and the bar's track too, so they still stand out from it.
+   --light-fill is the brightness bar's fill while on: neutral until the light
+   reports a color, e.g. a dimmable white bulb. */
 ha-card {
   --card-bg: var(--ha-card-background, var(--card-background-color, #fff));
-  background: light-dark(color-mix(in srgb, var(--card-bg) 96%, black), var(--card-bg));
+  --light-fill: color-mix(in srgb, var(--primary-text-color) 15%, transparent);
+  background: color-mix(in srgb, var(--card-bg) 96%, black);
 }
-ha-card.on {
-  background: light-dark(var(--card-bg), color-mix(in srgb, var(--card-bg) 94%, white));
-  --fill: light-dark(
-    var(--secondary-background-color, #e5e5e5),
-    color-mix(in srgb, var(--secondary-background-color, #e5e5e5) 92%, white)
-  );
+ha-card.on,
+ha-card.dark {
+  background: var(--card-bg);
+}
+ha-card.dark.on {
+  background: color-mix(in srgb, var(--card-bg) 94%, white);
+  --fill: color-mix(in srgb, var(--secondary-background-color, #e5e5e5) 92%, white);
+}
+/* While on in a color (--light, from its rgb_color), the card is a dim tint of
+   it, the keys and the bar's track a stronger one, and the bar's fill
+   stronger still: see-through, so the text color reads on it. On a light
+   theme the color is darkened a little first, so a white light still shows. */
+ha-card.on.colored {
+  --tint: color-mix(in srgb, var(--light) 80%, black);
+  background: color-mix(in srgb, var(--tint) 14%, var(--card-bg));
+  --fill: color-mix(in srgb, var(--tint) 26%, var(--card-bg));
+  --light-fill: color-mix(in srgb, var(--tint) 45%, transparent);
+}
+ha-card.dark.on.colored {
+  --tint: var(--light);
 }
 
 /* A bulb with the options key at the far right, then the name below */
@@ -46,7 +63,8 @@ ha-card.on {
 .title:empty {
   display: none;
 }
-/* The bulb: a greyed outline while off; filled in the text color while on */
+/* The bulb: a greyed outline while off; filled while on, in the light's color
+   if it has one */
 .bulb {
   --icon-size: 40px;
 }
@@ -60,6 +78,9 @@ ha-card.on {
 .on .bulb .reicon:last-of-type {
   display: block;
 }
+.colored .bulb {
+  color: var(--tint);
+}
 /* Small, and pulled into the card's padding so it doesn't make the row taller */
 .options {
   width: 36px;
@@ -71,9 +92,6 @@ ha-card.on {
 
 /* A square favorites key, then the brightness slider filling the rest of the row */
 .controls {
-  /* The slider's bar while on. Neutral until the light reports a color, e.g.
-     a dimmable white bulb. */
-  --light-fill: color-mix(in srgb, var(--primary-text-color) 15%, transparent);
   --control-height: 56px;
   display: flex;
   gap: var(--gap-small);
@@ -96,12 +114,6 @@ ha-card.on {
 }
 .on .swatch {
   background: var(--light, var(--primary-text-color));
-}
-
-/* The light's color, set from its rgb_color: see-through, so the text color
-   reads on it and it doesn't glare on a dark theme */
-.colored {
-  --light-fill: color-mix(in srgb, var(--light) 45%, transparent);
 }
 
 /* Brightness: the bar fills from the left in the light's color; empty is off.
