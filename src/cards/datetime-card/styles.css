@@ -27,11 +27,11 @@ ha-card {
 }
 
 ha-card.large {
-  padding: 12px 0;
-  gap: 4px;
+  padding: 6px 0 12px;
 }
 .large .name {
   font-size: var(--font-size-m);
+  margin-bottom: 4px;
 }
 .large .time {
   font-size: 72px;
