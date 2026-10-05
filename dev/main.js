@@ -122,6 +122,7 @@ function select(type) {
     onCall: ({ domain, service, data, target }) =>
       log("service", `${domain}.${service}`, { ...data, ...target }),
     onApi: ({ method, path }) => log("api", method, decodeURIComponent(path)),
+    onWs: ({ type, ...data }) => log("ws", type, data),
   });
   mock = m;
   renderEntities();

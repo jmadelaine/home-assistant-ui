@@ -1,25 +1,64 @@
 ha-card {
   padding: var(--card-padding);
   display: grid;
+  /* Don't let a row's content widen the card */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--gap-large);
+  /* A tap anywhere toggles the light */
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+ha-card.unavailable {
+  cursor: default;
+}
+/* The card lights up with the light. On a light theme it's dimmed while the
+   light is off and plain while it's on; on a dark theme it's plain while off
+   and a little lighter while on, keys and the bar's track too, so they still
+   stand out from it. */
+ha-card {
+  --card-bg: var(--ha-card-background, var(--card-background-color, #fff));
+  background: light-dark(color-mix(in srgb, var(--card-bg) 96%, black), var(--card-bg));
+}
+ha-card.on {
+  background: light-dark(var(--card-bg), color-mix(in srgb, var(--card-bg) 94%, white));
+  --fill: light-dark(
+    var(--secondary-background-color, #e5e5e5),
+    color-mix(in srgb, var(--secondary-background-color, #e5e5e5) 92%, white)
+  );
 }
 
-/* The name, with the options key at the far right */
+/* A bulb with the options key at the far right, then the name below */
 .header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  gap: var(--gap-large);
+  gap: var(--gap-small) var(--gap-large);
 }
+/* Long names wrap; one with no spaces, like an entity ID, breaks anywhere */
 .title {
-  flex: 1;
+  grid-column: 1 / -1;
   min-width: 0;
   font-size: var(--font-size-m);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .title:empty {
   display: none;
+}
+/* The bulb: a greyed outline while off; filled in the text color while on */
+.bulb {
+  --icon-size: 40px;
+}
+.bulb .reicon:first-of-type {
+  opacity: var(--secondary-opacity);
+}
+.bulb .reicon:last-of-type,
+.on .bulb .reicon:first-of-type {
+  display: none;
+}
+.on .bulb .reicon:last-of-type {
+  display: block;
 }
 /* Small, and pulled into the card's padding so it doesn't make the row taller */
 .options {
@@ -30,51 +69,52 @@ ha-card {
   --icon-size: 22px;
 }
 
-/* A square power key, then the brightness slider filling the rest of the row */
+/* A square favorites key, then the brightness slider filling the rest of the row */
 .controls {
-  --light: var(--state-light-active-color, #ff9800);
-  /* Behind the controls while on: see-through, so the text color reads on it
-     and it doesn't glare on a dark theme */
-  --light-fill: color-mix(in srgb, var(--light) 45%, transparent);
+  /* The slider's bar while on. Neutral until the light reports a color, e.g.
+     a dimmable white bulb. */
+  --light-fill: color-mix(in srgb, var(--primary-text-color) 15%, transparent);
   --control-height: 56px;
-  display: grid;
-  grid-template-columns: var(--control-height) 1fr;
-  gap: var(--gap-large);
+  display: flex;
+  gap: var(--gap-small);
   transition: opacity 0.2s;
 }
-.power {
+.favorite {
+  flex: none;
+  width: var(--control-height);
   height: var(--control-height);
-  --icon-size: 28px;
 }
 
-/* Power: an outline bulb while off; a filled one on the light's color while on */
-.power .reicon:last-of-type,
-.on .power .reicon:first-of-type {
-  display: none;
+/* Favorites: a dot in the light's color while on, a muted one while off.
+   The faint ring keeps a white light's dot visible on a light theme. */
+.swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary-text-color) 25%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-text-color) 12%, transparent);
 }
-.on .power .reicon:last-of-type {
-  display: block;
-}
-/* Layered on the key's usual fill, to match the slider's bar over its track */
-.on .power {
-  background: linear-gradient(var(--light-fill), var(--light-fill)), var(--fill);
-}
-.on .power:active {
-  filter: brightness(0.9);
+.on .swatch {
+  background: var(--light, var(--primary-text-color));
 }
 
-/* Brightness: the bar fills from the left in the light's color; empty is off */
+/* The light's color, set from its rgb_color: see-through, so the text color
+   reads on it and it doesn't glare on a dark theme */
+.colored {
+  --light-fill: color-mix(in srgb, var(--light) 45%, transparent);
+}
+
+/* Brightness: the bar fills from the left in the light's color; empty is off.
+   For an on/off-only light it's a switch, full while on. */
 .slider {
   position: relative;
+  flex: 1;
+  min-width: 0;
   height: var(--control-height);
   border-radius: var(--radius);
   background: var(--fill);
   overflow: hidden;
-  cursor: pointer;
   touch-action: pan-y;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-tap-highlight-color: transparent;
 }
 .slider:focus-visible {
   outline: 2px solid var(--accent);
@@ -92,7 +132,8 @@ ha-card {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 14px;
+  /* Left only, so "100%" still fits beside the sun on a narrow card */
+  padding-left: 12px;
   font-size: var(--font-size-s);
   font-weight: var(--font-weight-medium);
   font-variant-numeric: tabular-nums;

@@ -17,10 +17,11 @@ const defaultServices = {
 //   entities: { "light.x": "on" | { state, attributes, options } }
 //   services: { "domain.service": ({ data, entityIds, setState, states }) => {} }
 //   api: (method, path, hass) => response, for hass.callApi (Home Assistant's REST API)
+//   ws: (message, hass) => response, for hass.callWS (Home Assistant's websocket API)
 // onUpdate(hass) runs after every state change; onCall(call) for every service
-// call; onApi(request) for every callApi.
-export function createMockHass(preview = {}, { onUpdate, onCall, onApi, darkMode = false } = {}) {
-  const { entities = {}, services = {}, api } = preview;
+// call; onApi(request) for every callApi; onWs(message) for every callWS.
+export function createMockHass(preview = {}, { onUpdate, onCall, onApi, onWs, darkMode = false } = {}) {
+  const { entities = {}, services = {}, api, ws } = preview;
   const states = {};
   let hass;
 
@@ -62,10 +63,24 @@ export function createMockHass(preview = {}, { onUpdate, onCall, onApi, darkMode
     return response;
   };
 
+  const callWS = async (message) => {
+    onWs?.(message);
+    const response = ws?.(message, hass);
+    if (response === undefined) throw new Error(`No mock for ${message.type} in preview.js ws`);
+    return response;
+  };
+
+  // Events never fire in the playground; subscribing just succeeds
+  const connection = {
+    subscribeEvents: async () => async () => {},
+  };
+
   const build = () => ({
     states: { ...states },
     callService,
     callApi,
+    callWS,
+    connection,
     themes: { darkMode, theme: "default", themes: {} },
     selectedTheme: null,
     language: "en",

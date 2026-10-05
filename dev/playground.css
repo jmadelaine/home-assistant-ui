@@ -243,7 +243,8 @@ main {
   color: var(--accent-color);
 }
 #log .fetch,
-#log .api {
+#log .api,
+#log .ws {
   color: var(--success-color);
 }
 #log .detail {
