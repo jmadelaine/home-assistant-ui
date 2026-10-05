@@ -8,6 +8,8 @@
 
 :host {
   display: block;
+  /* Home Assistant's views set line-height: 1.6, which would otherwise inherit into every card */
+  line-height: normal;
 
   /* Spacing */
   --gap: 12px;
