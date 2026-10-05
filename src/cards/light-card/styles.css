@@ -1,0 +1,100 @@
+ha-card {
+  padding: var(--card-padding);
+  display: grid;
+  gap: var(--gap);
+}
+
+/* The name, with the options key at the far right */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+}
+.title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-m);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.title:empty {
+  display: none;
+}
+/* Small, and pulled into the card's padding so it doesn't make the row taller */
+.options {
+  width: 36px;
+  height: 36px;
+  margin: -6px -6px -6px auto;
+  border-radius: 50%;
+  --icon-size: 22px;
+}
+
+/* A square power key, then the brightness slider filling the rest of the row */
+.controls {
+  --light: var(--state-light-active-color, #ff9800);
+  /* Behind the controls while on: see-through, so the text color reads on it
+     and it doesn't glare on a dark theme */
+  --light-fill: color-mix(in srgb, var(--light) 45%, transparent);
+  --control-height: 56px;
+  display: grid;
+  grid-template-columns: var(--control-height) 1fr;
+  gap: var(--gap);
+  transition: opacity 0.2s;
+}
+.power {
+  height: var(--control-height);
+  --icon-size: 28px;
+}
+
+/* Power: an outline bulb while off; a filled one on the light's color while on */
+.power .reicon:last-of-type,
+.on .power .reicon:first-of-type {
+  display: none;
+}
+.on .power .reicon:last-of-type {
+  display: block;
+}
+/* Layered on the key's usual fill, to match the slider's bar over its track */
+.on .power {
+  background: linear-gradient(var(--light-fill), var(--light-fill)), var(--fill);
+}
+.on .power:active {
+  filter: brightness(0.9);
+}
+
+/* Brightness: the bar fills from the left in the light's color; empty is off */
+.slider {
+  position: relative;
+  height: var(--control-height);
+  border-radius: var(--radius);
+  background: var(--fill);
+  overflow: hidden;
+  cursor: pointer;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.slider:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--brightness, 0%);
+  background: var(--light-fill);
+}
+.value {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+  --icon-size: 20px;
+}

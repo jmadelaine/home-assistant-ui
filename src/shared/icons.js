@@ -3,6 +3,7 @@
 // show them all. Browse more at https://reicon.dev.
 export {
   AlertCircle,
+  Bulb2,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -22,6 +23,7 @@ export {
   MoonCloud,
   Power,
   Record4,
+  Setting4,
   Snowflake,
   Sun,
   Umbrella,
