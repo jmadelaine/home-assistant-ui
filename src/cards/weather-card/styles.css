@@ -1,7 +1,7 @@
 ha-card {
   padding: var(--card-padding);
   display: grid;
-  gap: var(--gap);
+  gap: var(--gap-large);
 }
 
 /* Current conditions */
@@ -9,7 +9,7 @@ ha-card {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--gap);
+  gap: var(--gap-large);
   --icon-size: 52px;
 }
 .temp {

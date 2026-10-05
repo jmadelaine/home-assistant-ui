@@ -11,9 +11,9 @@ ha-card {
   margin: 0 auto;
 }
 .wrap {
-  --cell: calc((100cqw - var(--gap)) / 4);
+  --cell: calc((100cqw - var(--gap-large)) / 4);
   display: grid;
-  gap: var(--gap);
+  gap: var(--gap-large);
   grid-template-columns: var(--cell) calc(var(--cell) * 3);
 }
 .left,
@@ -23,7 +23,7 @@ ha-card {
   transition: opacity 0.2s;
 }
 .left {
-  gap: var(--gap);
+  gap: var(--gap-large);
 }
 .side {
   gap: var(--side-gap);

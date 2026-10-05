@@ -1,7 +1,7 @@
 ha-card {
   padding: var(--card-padding);
   display: grid;
-  gap: var(--gap);
+  gap: var(--gap-large);
 }
 .title {
   font-size: var(--font-size-m);
@@ -15,7 +15,7 @@ ha-card {
 .stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--gap);
+  gap: var(--gap-large);
 }
 .label {
   display: flex;
@@ -159,7 +159,7 @@ ha-card {
 .times {
   position: relative;
   height: 14px;
-  margin-top: calc(var(--gap) * -0.5);
+  margin-top: calc(var(--gap-large) * -0.5);
   font-size: 11px;
 }
 .times span {

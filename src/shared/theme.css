@@ -12,7 +12,8 @@
   line-height: normal;
 
   /* Spacing */
-  --gap: 12px;
+  --gap-large: 12px;
+  --gap-small: 6px;
   --card-padding: 12px;
 
   /* Shape */

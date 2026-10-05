@@ -1,14 +1,14 @@
 ha-card {
   padding: var(--card-padding);
   display: grid;
-  gap: var(--gap);
+  gap: var(--gap-large);
 }
 
 /* The name, with the options key at the far right */
 .header {
   display: flex;
   align-items: center;
-  gap: var(--gap);
+  gap: var(--gap-large);
 }
 .title {
   flex: 1;
@@ -39,7 +39,7 @@ ha-card {
   --control-height: 56px;
   display: grid;
   grid-template-columns: var(--control-height) 1fr;
-  gap: var(--gap);
+  gap: var(--gap-large);
   transition: opacity 0.2s;
 }
 .power {

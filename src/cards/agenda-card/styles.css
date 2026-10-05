@@ -1,7 +1,7 @@
 ha-card {
   padding: var(--card-padding);
   display: grid;
-  gap: var(--gap);
+  gap: var(--gap-large);
 }
 .title {
   font-size: var(--font-size-m);
@@ -14,7 +14,7 @@ ha-card {
 
 .days {
   display: grid;
-  gap: var(--gap);
+  gap: var(--gap-large);
 }
 
 /* "Today", "Tomorrow", "Wed, Oct 8 · in 3 days" */
