@@ -443,8 +443,8 @@ class WeatherCard extends HTMLElement {
 
     // Rain headline and hourly panel, over the next `hours` hours
     const hours = forecast.hours.filter((h) => h.time >= thisHour).slice(0, c.hours);
-    $(".headline").hidden = !hours.length;
-    if (hours.length) {
+    $(".headline").hidden = !c.has_headline || !hours.length;
+    if (!$(".headline").hidden) {
       const spell = rainSpell(hours);
       const span = `${hours.length} hour${hours.length === 1 ? "" : "s"}`;
       let text = `Dry for the next ${span}`;

@@ -1,8 +1,8 @@
 # Weather
 
 The forecast from [Met.no](https://api.met.no/) (the Norwegian Meteorological
-Institute) for a location. It shows the conditions now and one line saying when
-it will rain next. It can also show wind, pressure and humidity, an hourly
+Institute) for a location. It shows the conditions now. It can also show one
+line saying when it will rain next, wind, pressure and humidity, an hourly
 forecast, an hourly rain chart, and a strip of the days ahead.
 
 The card fetches the forecast itself, so no weather entity is needed.
@@ -23,6 +23,7 @@ type: custom:weather-card
 | `name`               | string  | none                         | Title under the condition.                                                  |
 | `temperature_entity` | string  | none                         | Sensor whose temperature replaces the forecast's, e.g. your own thermometer. |
 | `has_details`        | boolean | `false`                      | Show wind speed and direction, pressure and humidity.                       |
+| `has_headline`       | boolean | `false`                      | Show the line saying when it will rain next.                                |
 | `has_hourly_forecast` | boolean | `false`                     | Show each hour's temperature as a line, and its weather.                    |
 | `has_rain_chart`     | boolean | `false`                      | Show a bar for each hour's rain.                                            |
 | `has_daily_forecast` | boolean | `false`                      | Show a tile for each day ahead.                                             |
@@ -83,6 +84,7 @@ your Home Assistant theme:
 ```yaml
 type: custom:weather-card
 has_details: true
+has_headline: true
 has_hourly_forecast: true
 has_rain_chart: true
 has_daily_forecast: true
