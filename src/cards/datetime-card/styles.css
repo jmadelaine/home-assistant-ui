@@ -1,19 +1,23 @@
 ha-card {
-  padding: 8px 0;
+  padding: 12px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: var(--gap-small);
 }
-.name,
+.name {
+  font-size: var(--font-size-m);
+}
 .date {
-  font-size: var(--font-size-s);
+  font-size: var(--font-size-l);
 }
 .name:empty,
-.date:empty {
+.date:empty,
+.zones:empty {
   display: none;
 }
 .time {
-  font-size: var(--font-size-l);
+  font-size: 60px;
   font-weight: var(--font-weight-medium);
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
@@ -21,21 +25,51 @@ ha-card {
   align-items: flex-start;
   gap: 0.1em;
 }
+/* Seconds on top, AM/PM below and smaller still, sized to leave a gap between
+   them. With a line height of about the cap height, the seconds line up with
+   the top of the digits and AM/PM with their baseline. */
+.side {
+  font-size: 0.44em;
+  line-height: 0.72;
+  align-self: stretch;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  padding: 0.55em 0;
+}
 .sec {
-  font-size: 0.5em;
-  margin-top: 0.23em;
+  grid-row: 1;
+}
+.period {
+  grid-row: 2;
+  align-self: end;
+  font-size: 0.8em;
+  text-transform: uppercase;
 }
 
-ha-card.large {
-  padding: 12px 0;
+/* The line above the other time zones, with room either side */
+.divider {
+  align-self: stretch;
+  height: 1px;
+  padding: var(--gap-small) 0;
+  background: var(--divider-color, rgba(0, 0, 0, 0.12)) content-box;
 }
-.large .name {
+
+/* Other time zones: name | time, one per row, below the clock */
+.zones {
+  align-self: stretch;
+  display: grid;
+  gap: var(--gap-small);
+  padding: 0 var(--card-padding);
   font-size: var(--font-size-m);
-  margin-bottom: 4px;
 }
-.large .time {
-  font-size: 72px;
+.zone {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--gap-large);
 }
-.large .date {
-  font-size: var(--font-size-l);
+.zone-time {
+  text-transform: uppercase;
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
 }

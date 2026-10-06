@@ -23,6 +23,8 @@ class DateTimeCard extends HTMLElement {
           <div class="name secondary"></div>
           <div class="time"></div>
           <div class="date secondary"></div>
+          <div class="divider" hidden></div>
+          <div class="zones"></div>
         </ha-card>`,
       );
     }
@@ -39,40 +41,47 @@ class DateTimeCard extends HTMLElement {
     // The home's time zone and Home Assistant's language, unless the config says otherwise
     const locale = c.locale ?? this._hass?.locale?.language ?? this._hass?.language;
     const timeZone = c.time_zone ?? this._hass?.config?.time_zone;
-    const large = c.size === "large";
     const now = new Date();
     const root = this.shadowRoot;
 
-    root.querySelector("ha-card").className = large ? "large" : "";
     root.querySelector(".name").textContent = c.name || "";
 
-    const timeOpts = { hour: "2-digit", minute: "2-digit", timeZone };
-    if (c.has_seconds) timeOpts.second = "2-digit";
-    if (c.hour12) timeOpts.hour12 = true;
-    else timeOpts.hourCycle = "h23";
+    // The other time zones share this clock, just without seconds
+    const clockOpts = { hour: "2-digit", minute: "2-digit" };
+    if (c.hour12) clockOpts.hour12 = true;
+    else clockOpts.hourCycle = "h23";
 
-    // Seconds go in their own half-size span, without the colon before them
+    const timeOpts = { ...clockOpts, timeZone };
+    if (c.has_seconds) timeOpts.second = "2-digit";
+
+    // Seconds and AM/PM stack, half size, beside the hours and minutes,
+    // without the separators that joined them on
     const parts = new Intl.DateTimeFormat(locale, timeOpts).formatToParts(now);
-    const nodes = [];
+    const aside = ["second", "dayPeriod"];
+    const side = {};
     let text = "";
-    const flush = (className) => {
-      if (!text) return;
-      const span = document.createElement("span");
-      if (className) span.className = className;
-      span.textContent = text;
-      nodes.push(span);
-      text = "";
-    };
     parts.forEach((p, i) => {
-      if (p.type === "second") {
-        flush();
-        text = p.value;
-        flush("sec secondary");
-      } else if (!(p.type === "literal" && parts[i + 1]?.type === "second")) {
+      if (aside.includes(p.type)) side[p.type] = p.value;
+      else if (
+        p.type !== "literal" ||
+        !(aside.includes(parts[i + 1]?.type) || aside.includes(parts[i - 1]?.type))
+      ) {
         text += p.value;
       }
     });
-    flush();
+    const span = (className, value) => {
+      const el = document.createElement("span");
+      el.className = className;
+      el.textContent = value;
+      return el;
+    };
+    const nodes = [span("hm", text.trim())];
+    if (side.second || side.dayPeriod) {
+      const col = span("side", "");
+      if (side.second) col.append(span("sec secondary", side.second));
+      if (side.dayPeriod) col.append(span("period", side.dayPeriod));
+      nodes.push(col);
+    }
     root.querySelector(".time").replaceChildren(...nodes);
 
     root.querySelector(".date").textContent = c.has_date
@@ -81,14 +90,33 @@ class DateTimeCard extends HTMLElement {
           timeZone,
         })
       : "";
+
+    const zones = c.other_time_zones || [];
+    root.querySelector(".divider").hidden = !zones.length;
+    root.querySelector(".zones").replaceChildren(
+      ...zones.map((zone) => {
+        const row = document.createElement("div");
+        row.className = "zone";
+        const name = document.createElement("span");
+        name.textContent = zone.name || zone.time_zone;
+        const time = document.createElement("span");
+        time.className = "zone-time";
+        time.textContent = now.toLocaleTimeString(locale, {
+          ...clockOpts,
+          timeZone: zone.time_zone,
+        });
+        row.append(name, time);
+        return row;
+      }),
+    );
   }
 
   getCardSize() {
-    return 2;
+    return 3 + Math.ceil((this.config?.other_time_zones?.length || 0) / 2);
   }
 }
 
 registerCard("datetime-card", DateTimeCard, {
   name: "Date & Time",
-  description: "A clock with optional seconds, date and title",
+  description: "A clock with optional seconds, date, title and other time zones",
 });
