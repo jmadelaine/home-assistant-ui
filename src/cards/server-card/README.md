@@ -28,7 +28,7 @@ disk_size: 256
 
 ## Behavior
 
-- RAM and storage show the amount used, e.g. **3.2 GB of 8 GB**. Under 10 they
+- RAM and storage show the amount used, e.g. **3.2 GB**. Under 10 they
   show one decimal place; from 1000 GB they show in TB.
 - All three lines share one scale: percent of capacity, from 0% at the bottom
   to 100% at the top. So a line's height always means how full it is.

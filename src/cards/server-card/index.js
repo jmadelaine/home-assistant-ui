@@ -212,8 +212,7 @@ class ServerCard extends HTMLElement {
         const digits = used < 10 ? 1 : 0;
         return { value: used.toLocaleString(lang, { maximumFractionDigits: digits, minimumFractionDigits: digits }), unit };
       };
-      const of = size ? `of ${size >= 1000 ? `${size / 1000} TB` : `${size} GB`}` : "";
-      return { ...s, id, current, amount, of };
+      return { ...s, id, current, amount };
     });
   }
 
@@ -234,14 +233,12 @@ class ServerCard extends HTMLElement {
         stat.className = "stat";
         stat.innerHTML = `
           <div class="label">${lineKey(s.dash)}<span class="secondary"></span></div>
-          <div class="reading"><span class="value"></span><span class="unit secondary"></span></div>
-          <div class="of secondary"></div>`;
+          <div class="reading"><span class="value"></span><span class="unit secondary"></span></div>`;
         stat.querySelector(".label span").textContent = s.label;
         const known = Number.isFinite(s.current);
         const { value, unit } = known ? s.amount(s.current) : { value: "–", unit: "" };
         stat.querySelector(".value").textContent = value;
         stat.querySelector(".unit").textContent = unit;
-        stat.querySelector(".of").textContent = s.of;
         stat.querySelector(".key").style.color = known ? loadColor(s.current) : "var(--accent)";
         return stat;
       }),
