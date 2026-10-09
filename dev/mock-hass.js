@@ -18,10 +18,12 @@ const defaultServices = {
 //   services: { "domain.service": ({ data, entityIds, setState, states }) => {} }
 //   api: (method, path, hass) => response, for hass.callApi (Home Assistant's REST API)
 //   ws: (message, hass) => response, for hass.callWS (Home Assistant's websocket API)
+//   devices: { "<device id>": { name, entities: ["switch.x"] } }, for hass.devices
+//     and hass.entities (Home Assistant's device and entity registries)
 // onUpdate(hass) runs after every state change; onCall(call) for every service
 // call; onApi(request) for every callApi; onWs(message) for every callWS.
 export function createMockHass(preview = {}, { onUpdate, onCall, onApi, onWs, darkMode = false } = {}) {
-  const { entities = {}, services = {}, api, ws } = preview;
+  const { entities = {}, services = {}, api, ws, devices = {} } = preview;
   const states = {};
   let hass;
 
@@ -75,8 +77,18 @@ export function createMockHass(preview = {}, { onUpdate, onCall, onApi, onWs, da
     subscribeEvents: async () => async () => {},
   };
 
+  // The registries: each device, and the device each entity belongs to
+  const deviceRegistry = {};
+  const entityRegistry = {};
+  for (const [id, { entities: ids = [], ...device }] of Object.entries(devices)) {
+    deviceRegistry[id] = { id, name_by_user: null, ...device };
+    for (const entityId of ids) entityRegistry[entityId] = { entity_id: entityId, device_id: id };
+  }
+
   const build = () => ({
     states: { ...states },
+    entities: entityRegistry,
+    devices: deviceRegistry,
     callService,
     callApi,
     callWS,

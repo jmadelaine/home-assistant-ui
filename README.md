@@ -10,6 +10,7 @@ Custom Lovelace cards with a shared look. Every card ships in one bundle,
 | [Light](src/cards/light-card/README.md)                       | `custom:light-card`         |
 | [Projector Controls](src/cards/projector-controls/README.md) | `custom:projector-controls` |
 | [Server](src/cards/server-card/README.md)                     | `custom:server-card`        |
+| [Voice Mute](src/cards/voice-mute-card/README.md)             | `custom:voice-mute-card`    |
 | [Weather](src/cards/weather-card/README.md)                   | `custom:weather-card`       |
 
 ## Development
@@ -91,6 +92,8 @@ index.html              playground page
      // or undefined to let the request through to the network.
      // The card is remounted (and fetches again) when you change a mock entity.
      fetch: (url, hass) => undefined,
+     // Optional. Devices and the entities on them, for hass.devices and hass.entities.
+     devices: { desk_lamp: { name: "Desk Lamp", entities: ["light.desk"] } },
    };
    ```
 

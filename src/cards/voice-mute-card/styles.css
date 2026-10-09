@@ -1,0 +1,70 @@
+/* The mic, then the device's name and whether it's listening. A tap anywhere
+   mutes or unmutes. */
+ha-card {
+  padding: var(--card-padding);
+  display: grid;
+  /* Don't let a long name widen the card */
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--gap-large);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, opacity 0.2s;
+}
+ha-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+/* While muted, the card is a dim tint of the danger color, so a muted
+   assistant stands out on the dashboard */
+ha-card.muted {
+  --card-bg: var(--ha-card-background, var(--card-background-color, #fff));
+  background: color-mix(in srgb, var(--danger) 12%, var(--card-bg));
+}
+ha-card.unavailable {
+  cursor: default;
+  opacity: 0.35;
+}
+
+/* The mic in a round key: the accent color while listening, crossed out in
+   the danger color while muted */
+.mic {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  transition: background 0.2s, color 0.2s;
+}
+.muted .mic {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 20%, transparent);
+}
+.unavailable .mic {
+  color: var(--primary-text-color);
+  background: var(--fill);
+}
+.mic .reicon:last-of-type,
+.muted .mic .reicon:first-of-type {
+  display: none;
+}
+.muted .mic .reicon:last-of-type {
+  display: block;
+}
+
+/* Long names wrap; one with no spaces, like an entity ID, breaks anywhere */
+.title {
+  font-size: var(--font-size-m);
+  overflow-wrap: anywhere;
+}
+.title:empty {
+  display: none;
+}
+.status {
+  margin-top: 2px;
+  font-size: var(--font-size-s);
+}

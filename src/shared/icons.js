@@ -19,6 +19,8 @@ export {
   Fog,
   Gauge,
   Home,
+  Microphone,
+  MicrophoneSlash,
   Moon,
   MoonCloud,
   Power,
