@@ -7,10 +7,23 @@ const sheet = css(styles);
 // The mute switch's domain; on means muted
 const DOMAINS = ["switch", "input_boolean"];
 
+const unreachable = (state) => !state || ["unavailable", "unknown"].includes(state);
+
+// What the assist satellite is doing, as shown under the name
+const ACTIVITY = {
+  idle: "Idle",
+  listening: "Listening",
+  processing: "Processing",
+  responding: "Responding",
+};
+
 class VoiceMuteCard extends HTMLElement {
   setConfig(config) {
     if (!DOMAINS.includes(config.entity?.split(".")[0])) {
       throw new Error("Set entity to the voice assistant's mute switch, e.g. switch.living_room_jabra_mute");
+    }
+    if (config.satellite_entity != null && !config.satellite_entity.startsWith("assist_satellite.")) {
+      throw new Error("Set satellite_entity to an assist satellite, e.g. assist_satellite.living_room_jabra");
     }
     this.config = { ...config };
     if (!this.shadowRoot) this._build();
@@ -27,7 +40,10 @@ class VoiceMuteCard extends HTMLElement {
       this,
       sheet,
       `<ha-card role="switch" tabindex="0">
-        <div class="mic" aria-hidden="true">${icon(Microphone)}${icon(MicrophoneSlash)}</div>
+        <div class="mic" aria-hidden="true">
+          ${icon(Microphone)}${icon(MicrophoneSlash)}
+          <div class="bars"><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
         <div class="text">
           <div class="title"></div>
           <div class="status secondary"></div>
@@ -53,20 +69,45 @@ class VoiceMuteCard extends HTMLElement {
     return device?.name_by_user || device?.name || entity?.attributes.friendly_name || this.config.entity;
   }
 
-  // Shows the name and whether the mic is muted, and dims the card while the
-  // voice assistant is unreachable
+  // The assist satellite: the one set in the config, or else the one on the
+  // same device as the switch. The search runs again only when the entity
+  // registry changes.
+  _satellite() {
+    if (this.config.satellite_entity) return this.config.satellite_entity;
+    const entities = this._hass?.entities;
+    if (!entities) return undefined;
+    if (this._found?.entities !== entities || this._found.entity !== this.config.entity) {
+      const deviceId = entities[this.config.entity]?.device_id;
+      const id = deviceId
+        ? Object.values(entities).find((e) => e.device_id === deviceId && e.entity_id.startsWith("assist_satellite."))?.entity_id
+        : undefined;
+      this._found = { entities, entity: this.config.entity, id };
+    }
+    return this._found.id;
+  }
+
+  // Shows the name, whether the mic is muted and, while it isn't, what the
+  // assist satellite is doing. Greys out the mic while either is unreachable,
+  // and dims the whole card while the mute switch is.
   _sync() {
     const entity = this._hass?.states?.[this.config.entity];
-    const state = entity?.state;
-    const muted = state === "on";
-    this._unavailable = !state || ["unavailable", "unknown"].includes(state);
+    const muted = entity?.state === "on";
+    this._unavailable = unreachable(entity?.state);
     const deviceName = this._deviceName(entity);
     const root = this.shadowRoot;
     root.querySelector(".title").textContent = this.config.name ?? deviceName;
-    root.querySelector(".status").textContent = this._unavailable ? "Unavailable" : muted ? "Muted" : "Listening";
+
+    // While unmuted, what the satellite is doing; just Unmuted without one
+    const satellite = this._satellite();
+    const activity = this._hass?.states?.[satellite]?.state;
+    const offline = this._unavailable || (!!satellite && unreachable(activity));
+    const status = offline ? "Unavailable" : muted ? "Muted" : (ACTIVITY[activity] ?? "Unmuted");
+    root.querySelector(".status").textContent = status;
 
     const card = root.querySelector("ha-card");
-    card.classList.toggle("muted", muted);
+    card.dataset.activity = !offline && !muted && Object.hasOwn(ACTIVITY, activity) ? activity : "";
+    card.classList.toggle("muted", muted && !offline);
+    card.classList.toggle("offline", offline);
     card.classList.toggle("unavailable", this._unavailable);
     card.tabIndex = this._unavailable ? -1 : 0;
     card.setAttribute("aria-label", `Mute ${this.config.name || deviceName}`);

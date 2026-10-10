@@ -44,8 +44,80 @@ ha-card.unavailable {
   color: var(--danger);
   background: color-mix(in srgb, var(--danger) 20%, transparent);
 }
-.unavailable .mic {
-  color: var(--primary-text-color);
+/* While the satellite is busy, the mic key fills in more strongly. A ring
+   pulses out of it while it's listening to you, it breathes while it works
+   out an answer, and it turns into a voice meter while it speaks. */
+[data-activity="listening"] .mic,
+[data-activity="processing"] .mic,
+[data-activity="responding"] .mic {
+  color: var(--text-primary-color, #fff);
+  background: var(--accent);
+}
+[data-activity="listening"] .mic {
+  animation: pulse 1.4s ease-out infinite;
+}
+[data-activity="processing"] .mic {
+  animation: breathe 1s ease-in-out infinite alternate;
+}
+/* Speaking: the mic gives way to five bars that rise and fall like a voice
+   meter. Each bar runs the same uneven swell at its own length and starting
+   point, so together they never fall into an obvious loop. The middle bars
+   reach higher, like a meter's peak. */
+.bars {
+  display: none;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+}
+[data-activity="responding"] .mic .reicon {
+  display: none !important;
+}
+[data-activity="responding"] .bars {
+  display: flex;
+}
+.bars span {
+  width: 3px;
+  height: 100%;
+  border-radius: 2px;
+  background: currentColor;
+  transform: scaleY(0.6);
+  animation: speak var(--speed) ease-in-out var(--delay) infinite;
+}
+.bars span:nth-child(1) { --speed: 0.9s; --delay: -0.3s; height: 55%; }
+.bars span:nth-child(2) { --speed: 0.74s; --delay: -0.6s; height: 80%; }
+.bars span:nth-child(3) { --speed: 1.06s; --delay: -0.15s; }
+.bars span:nth-child(4) { --speed: 0.82s; --delay: -0.45s; height: 80%; }
+.bars span:nth-child(5) { --speed: 0.96s; --delay: -0.7s; height: 55%; }
+@keyframes speak {
+  0%, 100% { transform: scaleY(0.3); }
+  20% { transform: scaleY(0.9); }
+  38% { transform: scaleY(0.5); }
+  55% { transform: scaleY(1); }
+  75% { transform: scaleY(0.4); }
+  88% { transform: scaleY(0.7); }
+}
+@keyframes pulse {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 12px transparent;
+  }
+}
+@keyframes breathe {
+  to {
+    background: color-mix(in srgb, var(--accent) 50%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mic,
+  .bars span {
+    animation: none !important;
+  }
+}
+/* Greyed out while the mute switch or the satellite is unreachable */
+.offline .mic {
+  color: color-mix(in srgb, var(--primary-text-color) 45%, transparent);
   background: var(--fill);
 }
 .mic .reicon:last-of-type,
