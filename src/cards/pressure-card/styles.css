@@ -1,0 +1,257 @@
+ha-card {
+  padding: var(--card-padding);
+  display: grid;
+  gap: var(--gap-large);
+}
+
+/* The reading now, and the migraine risk */
+.now {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--gap-large);
+}
+.reading {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.reading .value {
+  font-size: 40px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.reading .unit,
+.trend {
+  font-size: var(--font-size-s);
+}
+.trend:empty {
+  display: none;
+}
+.risk {
+  text-align: right;
+  font-size: var(--font-size-s);
+}
+.level {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: var(--font-size-m);
+  --icon-size: 20px;
+}
+.level.likely {
+  color: var(--danger);
+}
+
+/* "Falling fast from Wed 15:00 · −6.2 hPa in 24 h" */
+.headline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-medium);
+  --icon-size: 20px;
+}
+.headline .icon {
+  opacity: var(--secondary-opacity);
+}
+.headline.falling .icon {
+  opacity: 1;
+  color: var(--danger);
+}
+.headline .extra {
+  font-weight: normal;
+}
+.headline .extra:not(:empty)::before {
+  content: "· ";
+}
+
+/* The chart. Now's label sits above the plot, the days' names below it. */
+.chart {
+  position: relative;
+  padding-top: 16px;
+  /* Room at the right for the grid labels */
+  padding-right: 30px;
+  /* Vertical scrolling still works; dragging sideways reads the chart */
+  touch-action: pan-y;
+}
+.plot {
+  position: relative;
+  height: 120px;
+}
+.plot svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.grid line {
+  stroke: var(--divider-color, rgba(0, 0, 0, 0.12));
+  stroke-width: 1px;
+}
+.line {
+  fill: none;
+  stroke: var(--primary-text-color);
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.line.likely {
+  stroke: var(--danger);
+}
+/* The past is recorded, so it steps back behind the forecast */
+.past {
+  opacity: var(--secondary-opacity);
+}
+/* Where the line would have to drop to for a likely migraine */
+.threshold {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: 1.5px;
+  stroke-dasharray: 3 4;
+  stroke-linecap: round;
+  opacity: 0.6;
+}
+.tick {
+  position: absolute;
+  left: calc(100% + 6px);
+  transform: translateY(-50%);
+  font-size: 10px;
+  opacity: var(--secondary-opacity);
+}
+
+.now-line {
+  position: absolute;
+  top: -4px;
+  bottom: 0;
+  border-left: 1px dashed var(--primary-text-color);
+  opacity: 0.35;
+  pointer-events: none;
+}
+.now-label {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 11px;
+}
+.dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary-text-color);
+  /* A ring in the card's color sets the dot off the line */
+  box-shadow: 0 0 0 2px var(--ha-card-background, var(--card-background-color, #fff));
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.dot.likely {
+  background: var(--danger);
+}
+
+.cursor {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--primary-text-color);
+  opacity: 0.35;
+  pointer-events: none;
+}
+.tooltip {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  display: grid;
+  gap: 2px;
+  margin-left: 10px;
+  padding: 6px 8px;
+  border: 1px solid var(--divider-color, rgba(0, 0, 0, 0.12));
+  border-radius: 8px;
+  background: var(--ha-card-background, var(--card-background-color, #fff));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-size: 12px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.tooltip.left {
+  margin-left: 0;
+  transform: translateX(calc(-100% - 10px));
+}
+.tooltip .amount {
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-medium);
+}
+.tooltip .note {
+  color: var(--danger);
+}
+.tooltip :empty {
+  display: none;
+}
+
+/* Under the chart: times every 6 hours, then each day's name, centered under
+   its part of the chart */
+.axis {
+  display: grid;
+  gap: 2px;
+  margin-right: 30px;
+  margin-top: calc(var(--gap-large) * -0.5);
+}
+.times,
+.days {
+  position: relative;
+  height: 14px;
+}
+.times {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.days {
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+}
+.times span,
+.days span {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 12px;
+}
+.legend > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.key {
+  width: 16px;
+  height: 8px;
+  flex: none;
+  overflow: visible;
+}
+.key line {
+  stroke: var(--danger);
+  stroke-width: 2px;
+  stroke-linecap: round;
+}
+.key-threshold line {
+  stroke-width: 1.5px;
+  stroke-dasharray: 3 4;
+  opacity: 0.6;
+}
+.message {
+  font-size: var(--font-size-s);
+}
+.message:empty {
+  display: none;
+}

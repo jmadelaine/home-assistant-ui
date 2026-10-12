@@ -3,6 +3,7 @@
 // show them all. Browse more at https://reicon.dev.
 export {
   AlertCircle,
+  ArrowDownRight,
   Bulb2,
   ChevronDown,
   ChevronLeft,
@@ -28,6 +29,7 @@ export {
   Setting4,
   Snowflake,
   Sun,
+  TriangleWarning,
   Umbrella,
   Undo,
   VolumeLow,

@@ -8,6 +8,7 @@ Custom Lovelace cards with a shared look. Every card ships in one bundle,
 | [Agenda](src/cards/agenda-card/README.md)                     | `custom:agenda-card`        |
 | [Date & Time](src/cards/datetime-card/README.md)             | `custom:datetime-card`      |
 | [Light](src/cards/light-card/README.md)                       | `custom:light-card`         |
+| [Pressure](src/cards/pressure-card/README.md)                 | `custom:pressure-card`      |
 | [Projector Controls](src/cards/projector-controls/README.md) | `custom:projector-controls` |
 | [Server](src/cards/server-card/README.md)                     | `custom:server-card`        |
 | [Voice Mute](src/cards/voice-mute-card/README.md)             | `custom:voice-mute-card`    |
