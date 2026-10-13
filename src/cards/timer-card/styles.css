@@ -1,0 +1,214 @@
+ha-card {
+  padding: var(--card-padding);
+  display: grid;
+  gap: var(--gap-large);
+  /* Every digit the same width, so counting down never shifts the text */
+  font-variant-numeric: tabular-nums;
+}
+.title {
+  font-size: var(--font-size-m);
+}
+.title:empty,
+.timers:empty {
+  display: none;
+}
+
+/* Shown after a reload, until a tap lets the browser play sound */
+.sound-off {
+  grid-auto-flow: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  font-size: var(--font-size-s);
+  --icon-size: 20px;
+}
+
+/* Running timers: name, time left and when it ends, with its buttons beside,
+   or below on a narrow card */
+.timers {
+  display: grid;
+  gap: var(--gap-small);
+  container-type: inline-size;
+}
+.timer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px var(--gap-large);
+  padding: 10px 12px 12px;
+}
+.left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 32px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.15;
+  /* The bell matches the text: as tall, and the same color */
+  --icon-size: 1em;
+}
+.when {
+  font-size: 12px;
+}
+.actions {
+  display: flex;
+  gap: var(--gap-small);
+  --icon-size: 22px;
+}
+.actions .key {
+  width: 44px;
+  height: 44px;
+  /* The keys sit on the timer's surface, so they need their own tint */
+  background: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+}
+.actions .less,
+.actions .more {
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-medium);
+}
+.actions .key:disabled {
+  opacity: 0.4;
+}
+/* Comes after the rules above, so it wins over them */
+@container (max-width: 360px) {
+  .timer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .actions {
+    justify-content: flex-end;
+  }
+}
+.bar {
+  grid-column: 1 / -1;
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--primary-text-color) 10%, transparent);
+  overflow: hidden;
+}
+.bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.ring {
+  display: none;
+}
+.timer[data-state="paused"] .left {
+  opacity: var(--secondary-opacity);
+}
+.timer[data-state="done"] {
+  background: color-mix(in srgb, var(--warning) 16%, var(--fill));
+}
+/* Amber text alone is faint on a light card, so it leans toward the text color */
+.timer[data-state="done"] .left {
+  color: color-mix(in srgb, var(--warning) 75%, var(--primary-text-color));
+}
+.timer[data-state="done"] .bar span {
+  background: var(--warning);
+}
+.timer[data-state="done"] .toggle,
+.timer[data-state="done"] .less {
+  display: none;
+}
+/* Running: −1 +1 ⏸, with no 🗑, so a running timer can't be deleted.
+   Paused: 🗑 −1 +1 ▶, with ▶ where ⏸ was, so a double-tap just pauses and
+   resumes, and 🗑 at the other end. Finished: +1 🗑. Every 🗑 is red. */
+.toggle {
+  order: 1;
+}
+.timer[data-state="paused"] .remove {
+  order: -1;
+}
+/* Every delete key is red */
+.actions .remove {
+  background: var(--danger);
+  color: var(--text-primary-color, #fff);
+}
+.timer[data-state="running"] .remove {
+  display: none;
+}
+/* A finished timer shows a bell beside Done, swinging until it's dismissed,
+   even after the chime stops */
+.timer[data-state="done"] .ring {
+  display: block;
+  animation: ring 1s ease-in-out infinite;
+}
+@keyframes ring {
+  0%,
+  50%,
+  100% {
+    transform: rotate(0);
+  }
+  10%,
+  30% {
+    transform: rotate(14deg);
+  }
+  20%,
+  40% {
+    transform: rotate(-14deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .timer[data-state="done"] .ring {
+    animation: none;
+  }
+}
+
+/* Setting the next timer: −5, −1, +1, +5 around its length, then Clear, Start,
+   +10 and +30. The rows are as far apart as the keys, so they read as one pad. */
+.controls {
+  display: grid;
+  gap: var(--gap-small);
+}
+.setter {
+  display: grid;
+  grid-template-columns: 48px 48px minmax(0, 1fr) 48px 48px;
+  align-items: center;
+  gap: var(--gap-small);
+}
+.step {
+  height: 48px;
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-medium);
+}
+/* −5 and −1 on the left, +1 and +5 on the right, the length between */
+.setter .step:nth-child(3) {
+  grid-column: 4;
+}
+.setter .step:nth-child(4) {
+  grid-column: 5;
+}
+.length {
+  grid-column: 3;
+  grid-row: 1;
+  text-align: center;
+  font-size: var(--font-size-l);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+/* Lines up with the row above: Clear as wide as −5 and −1, Start under the
+   length, and square +10 and +30 keys under +1 and +5 */
+.go {
+  display: grid;
+  grid-template-columns: calc(2 * 48px + var(--gap-small)) minmax(0, 1fr) 48px 48px;
+  gap: var(--gap-small);
+  --icon-size: 22px;
+}
+.go .key {
+  height: 48px;
+  grid-auto-flow: column;
+  justify-content: center;
+  gap: 6px;
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-medium);
+}
+.start {
+  background: var(--accent);
+  color: var(--text-primary-color, #fff);
+}
+.setter .key:disabled,
+.go .key:disabled {
+  opacity: 0.4;
+}

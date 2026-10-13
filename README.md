@@ -11,6 +11,7 @@ Custom Lovelace cards with a shared look. Every card ships in one bundle,
 | [Pressure](src/cards/pressure-card/README.md)                 | `custom:pressure-card`      |
 | [Projector Controls](src/cards/projector-controls/README.md) | `custom:projector-controls` |
 | [Server](src/cards/server-card/README.md)                     | `custom:server-card`        |
+| [Timer](src/cards/timer-card/README.md)                       | `custom:timer-card`         |
 | [Voice Mute](src/cards/voice-mute-card/README.md)             | `custom:voice-mute-card`    |
 | [Weather](src/cards/weather-card/README.md)                   | `custom:weather-card`       |
 

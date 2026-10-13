@@ -22,6 +22,7 @@
   /* Color */
   --fill: var(--secondary-background-color, #e5e5e5);
   --accent: var(--primary-color, #03a9f4);
+  --warning: var(--warning-color, #ffa600);
   --danger: var(--error-color, #db4437);
 
   /* Weather colors. A Home Assistant theme can set e.g. weather-sun-color. */
