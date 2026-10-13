@@ -1,4 +1,5 @@
 import { createRoot, css, registerCard } from "../../shared/card.js";
+import { everySecond } from "../../shared/clock.js";
 import styles from "./styles.css?inline";
 
 const sheet = css(styles);
@@ -29,11 +30,11 @@ class DateTimeCard extends HTMLElement {
       );
     }
     this._tick();
-    this._timer = setInterval(() => this._tick(), 1000);
+    this._stop = everySecond(() => this._tick());
   }
 
   disconnectedCallback() {
-    clearInterval(this._timer);
+    this._stop?.();
   }
 
   _tick() {
