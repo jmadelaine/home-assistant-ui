@@ -1,8 +1,8 @@
 # Light
 
-A bulb and the name of a light, with a key for its full options, then a key for
-your favorite colors and a brightness slider. Tap anywhere else on the card to turn
-the light on or off. Works with any `light` entity, such as a WiZ, Hue or LIFX bulb.
+The name of a light, with a key for its full options, then a power key and a
+brightness slider. Tap the power key, or anywhere else on the card, to turn the
+light on or off. Works with any `light` entity, such as a WiZ, Hue or LIFX bulb.
 
 ## Usage
 
@@ -20,20 +20,16 @@ entity: light.bedroom
 
 ## Behavior
 
-- **Tap anywhere on the card** to toggle the light, except on the brightness
-  bar and the two keys, which do their own thing. Turning it on
-  brings back its last brightness. While it's on, the bulb above the name
-  fills in and the whole card takes the light's color: the bulb, the color
-  key's dot and the bar in it, and the card and keys in dimmer tints of it.
-  A light that doesn't report a color, such as a dimmable white bulb, just
-  brightens the card.
-- **Tap the color key** to switch to the next of the light's
-  favorite colors. After the last favorite it goes back to the first. While
-  the light is off, it just turns it on in the color it had. Its dot shows the
-  light's color while it's on. The key only shows once the light has favorites.
+- **Tap the power key**, or anywhere else on the card, to toggle the light,
+  except on the brightness bar and the options key, which do their own thing.
+  Turning it on brings back its last brightness and color. The key shows a
+  bulb: a greyed outline while the light is off, filled while it's on. While
+  it's on, the whole card takes the light's color: the bulb and the bar in it,
+  and the card and keys in dimmer tints of it. A light that doesn't report a
+  color, such as a dimmable white bulb, just brightens the card.
 - **Tap the sliders key** next to the name to open Home Assistant's dialog for
   the light. That's where you pick a color or one of your favorite colors,
-  start an effect, or change its settings. Favorites are set up in that dialog too.
+  start an effect, or change its settings.
 - **Drag or tap the brightness bar.** The new brightness is sent when you let
   go. Dragging all the way to the left turns the light off; dragging right from
   off turns it on at that brightness.
@@ -43,9 +39,7 @@ entity: light.bedroom
   and **End** sets full brightness.
 - For a light that can only turn on and off, the bar is a switch: full while
   it's on, empty while it's off.
-- Favorites you add, remove or reorder in Home Assistant's dialog show up on
-  the card straight away.
-- While the light is `unavailable` or missing, the color key and bar dim, and
+- While the light is `unavailable` or missing, the power key and bar dim, and
   tapping the card does nothing. The options key still works.
 - Every press asks the Home Assistant app for a light haptic.
 

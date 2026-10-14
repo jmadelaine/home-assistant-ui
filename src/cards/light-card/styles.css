@@ -46,16 +46,15 @@ ha-card.dark.on.colored {
   --tint: var(--light);
 }
 
-/* A bulb with the options key at the far right, then the name below */
+/* The name, with the options key at the far right */
 .header {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  gap: var(--gap-small) var(--gap-large);
+  gap: var(--gap-large);
 }
 /* Long names wrap; one with no spaces, like an entity ID, breaks anywhere */
 .title {
-  grid-column: 1 / -1;
   min-width: 0;
   font-size: var(--font-size-m);
   overflow-wrap: anywhere;
@@ -63,57 +62,53 @@ ha-card.dark.on.colored {
 .title:empty {
   display: none;
 }
-/* The bulb: a greyed outline while off; filled while on, in the light's color
-   if it has one */
-.bulb {
-  --icon-size: 40px;
+/* Keys press in a neutral shade rather than the accent, which clashes with
+   the light's color */
+button:active {
+  background: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
 }
-.bulb .reicon:first-of-type {
-  opacity: var(--secondary-opacity);
+.key:active {
+  background: color-mix(in srgb, var(--primary-text-color) 12%, var(--fill));
 }
-.bulb .reicon:last-of-type,
-.on .bulb .reicon:first-of-type {
-  display: none;
-}
-.on .bulb .reicon:last-of-type {
-  display: block;
-}
-.colored .bulb {
-  color: var(--tint);
-}
+
 /* Small, and pulled into the card's padding so it doesn't make the row taller */
 .options {
   width: 36px;
   height: 36px;
   margin: -6px -6px -6px auto;
+  grid-column: 2;
   border-radius: 50%;
   --icon-size: 22px;
 }
 
-/* A square favorites key, then the brightness slider filling the rest of the row */
+/* A square power key, then the brightness slider filling the rest of the row */
 .controls {
   --control-height: 56px;
   display: flex;
   gap: var(--gap-small);
   transition: opacity 0.2s;
 }
-.favorite {
+.power {
   flex: none;
   width: var(--control-height);
   height: var(--control-height);
+  --icon-size: 26px;
 }
 
-/* Favorites: a dot in the light's color while on, a muted one while off.
-   The faint ring keeps a white light's dot visible on a light theme. */
-.swatch {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--primary-text-color) 25%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+/* The power key's bulb: a greyed outline while off; filled while on, in the
+   light's color if it has one */
+.power .reicon:first-of-type {
+  opacity: var(--secondary-opacity);
 }
-.on .swatch {
-  background: var(--light, var(--primary-text-color));
+.power .reicon:last-of-type,
+.on .power .reicon:first-of-type {
+  display: none;
+}
+.on .power .reicon:last-of-type {
+  display: block;
+}
+.colored .power {
+  color: var(--tint);
 }
 
 /* Brightness: the bar fills from the left in the light's color; empty is off.

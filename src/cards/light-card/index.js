@@ -11,86 +11,19 @@ const PENDING_FOR = 3000;
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
-// Whether the light is showing a favorite color, e.g. { rgb_color: [255, 110, 84] }
-// or { color_temp_kelvin: 2700 }. The light reports colors back slightly
-// changed, so they only need to be close.
-function showsFavorite(attrs, favorite) {
-  if (favorite.color_temp_kelvin != null) {
-    return attrs.color_mode === "color_temp" &&
-      Math.abs(attrs.color_temp_kelvin - favorite.color_temp_kelvin) <= 50;
-  }
-  // A light on a color temperature also reports it as an rgb_color
-  if (attrs.color_mode === "color_temp") return false;
-  const [key, value] = Object.entries(favorite)[0] ?? [];
-  const now = attrs[key];
-  return Array.isArray(now) && value.every((v, i) => Math.abs(v - now[i]) <= 3);
-}
-
 class LightCard extends HTMLElement {
   setConfig(config) {
     if (!config.entity?.startsWith("light.")) {
       throw new Error("Set entity to a light, e.g. light.bedroom");
     }
-    const entityChanged = config.entity !== this.config?.entity;
     this.config = { ...config };
     if (!this.shadowRoot) this._build();
-    if (entityChanged && this._unwatch) this._loadFavorites();
     this._sync();
   }
 
   set hass(hass) {
     this._hass = hass;
-    this._watchFavorites();
     if (this.shadowRoot) this._sync();
-  }
-
-  connectedCallback() {
-    this._watchFavorites();
-  }
-
-  disconnectedCallback() {
-    this._unwatch?.then((unsubscribe) => unsubscribe?.());
-    this._unwatch = undefined;
-  }
-
-  // Favorite colors are kept in the light's entity registry entry, not its
-  // state. Loads them, then again whenever the entry changes, e.g. after
-  // editing favorites in Home Assistant's dialog.
-  _watchFavorites() {
-    if (this._unwatch || !this.isConnected || !this._hass || !this.config) return;
-    this._unwatch = Promise.resolve(
-      this._hass.connection?.subscribeEvents((e) => {
-        if (e.data.entity_id === this.config.entity) this._loadFavorites();
-      }, "entity_registry_updated"),
-    ).catch(() => undefined);
-    this._loadFavorites();
-  }
-
-  async _loadFavorites() {
-    const entity = this.config.entity;
-    let favorites = [];
-    try {
-      const entry = await this._hass.callWS({ type: "config/entity_registry/get", entity_id: entity });
-      favorites = entry.options?.light?.favorite_colors ?? [];
-    } catch {
-      // Not in the registry, e.g. a light without a unique ID: no favorites
-    }
-    if (entity !== this.config.entity) return; // switched lights meanwhile
-    this._favorites = favorites;
-    this._sync();
-  }
-
-  // Switches the light to the favorite after the one it's showing. If it isn't
-  // showing one, carries on from the last one picked here. While it's off,
-  // just turns it on as it was.
-  _nextFavorite() {
-    const favorites = this._favorites;
-    const entity = this._hass?.states?.[this.config.entity];
-    if (entity?.state !== "on") return this._call("turn_on");
-    const shown = favorites.findIndex((f) => showsFavorite(entity.attributes, f));
-    const next = ((shown >= 0 ? shown : this._favoriteIndex ?? -1) + 1) % favorites.length;
-    this._favoriteIndex = next;
-    this._call("turn_on", favorites[next]);
   }
 
   _build() {
@@ -99,12 +32,11 @@ class LightCard extends HTMLElement {
       sheet,
       `<ha-card>
         <div class="header">
-          <div class="bulb" aria-hidden="true">${icon(Bulb2)}${icon(Bulb2, "Filled")}</div>
-          <button class="options">${icon(Setting4)}</button>
           <div class="title"></div>
+          <button class="options">${icon(Setting4)}</button>
         </div>
         <div class="controls">
-          <button class="key favorite" hidden><span class="swatch"></span></button>
+          <button class="key power" role="switch">${icon(Bulb2)}${icon(Bulb2, "Filled")}</button>
           <div class="slider" tabindex="0" aria-describedby="slider-hint">
             <div class="fill"></div>
             <div class="value">${icon(Sun)}<span></span></div>
@@ -114,15 +46,15 @@ class LightCard extends HTMLElement {
       </ha-card>`,
     );
 
-    // A tap anywhere on the card toggles the light, except on its keys and the
-    // brightness bar, and except the click a browser sends after a press on the bar
+    // A tap anywhere on the card toggles the light, like the power key, except
+    // on the options key and the brightness bar, and except the click a
+    // browser sends after a press on the bar
     const card = root.querySelector("ha-card");
     card.addEventListener("pointerdown", () => (this._slid = false));
     card.addEventListener("click", (e) => {
-      if (this._slid || this._unavailable || e.target.closest("button")) return;
+      if (this._slid || this._unavailable || e.target.closest(".options")) return;
       this._call("toggle");
     });
-    root.querySelector(".favorite").addEventListener("click", () => this._nextFavorite());
     // Home Assistant's own dialog for the light: color, favorites, effects
     root.querySelector(".options").addEventListener("click", () => {
       this.dispatchEvent(
@@ -245,10 +177,10 @@ class LightCard extends HTMLElement {
     root.querySelector(".controls").classList.toggle("inactive", this._unavailable);
     root.querySelector(".options").setAttribute("aria-label", `${name} options`);
 
-    const favorite = root.querySelector(".favorite");
-    favorite.hidden = !this._favorites?.length;
-    favorite.disabled = this._unavailable;
-    favorite.setAttribute("aria-label", `Next favorite color for ${name}`);
+    const power = root.querySelector(".power");
+    power.disabled = this._unavailable;
+    power.setAttribute("aria-label", name);
+    power.setAttribute("aria-checked", String(isOn));
 
     // An on/off-only light has no brightness to set: its bar is a switch,
     // full while it's on
