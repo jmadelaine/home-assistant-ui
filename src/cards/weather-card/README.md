@@ -1,9 +1,13 @@
 # Weather
 
 The forecast from [Met.no](https://api.met.no/) (the Norwegian Meteorological
-Institute) for a location. It shows the conditions now. It can also show one
-line saying when it will rain next, wind, pressure and humidity, an hourly
-forecast, an hourly rain chart, and a strip of the days ahead.
+Institute) for a location. It shows the conditions now, today's wind, pressure
+and humidity, one line saying when it will rain today, and a strip of the days
+ahead.
+
+Tap a day and the whole card shows that day: its weather, high and low, wind,
+pressure, humidity and rain, and each hour's temperature, weather and rain. Tap
+anywhere else on the card to show today. Tap anywhere on the card to go back.
 
 The card fetches the forecast itself, so no weather entity is needed.
 
@@ -22,12 +26,6 @@ type: custom:weather-card
 | `elevation`          | number  | your home's                  | Height above sea level in meters. It makes the temperature more accurate.   |
 | `name`               | string  | none                         | Title under the condition.                                                  |
 | `temperature_entity` | string  | none                         | Sensor whose temperature replaces the forecast's, e.g. your own thermometer. |
-| `has_details`        | boolean | `false`                      | Show wind speed and direction, pressure and humidity.                       |
-| `has_headline`       | boolean | `false`                      | Show the line saying when it will rain next.                                |
-| `has_hourly_forecast` | boolean | `false`                     | Show each hour's temperature as a line, and its weather.                    |
-| `has_rain_chart`     | boolean | `false`                      | Show a bar for each hour's rain.                                            |
-| `has_daily_forecast` | boolean | `false`                      | Show a tile for each day ahead.                                             |
-| `hours`              | number  | `24`                         | How many hours ahead the headline and hourly panel look.                    |
 | `days`               | number  | `5`                          | How many days the strip shows, starting today.                              |
 | `temperature_unit`   | string  | `C`, or `F` if HA uses °F    | `C` or `F`.                                                                 |
 | `precipitation_unit` | string  | `mm`, or `in` if HA uses °F  | `mm` or `in`.                                                               |
@@ -39,15 +37,22 @@ Home Assistant (**Settings → System → General**). Unit values are not case-s
 
 ## Behavior
 
-- The headline reads the hourly forecast:
-  - "Dry for the next 24 hours"
+- A day covers midnight to midnight. Today covers this hour to midnight, and
+  its top shows the weather now. Other days show their high at the top.
+- The headline reads the day's forecast:
+  - "Dry all day", or "Dry for the rest of the day" today
   - "Rain from 15:00 · 3 mm"
-  - "Rain until 17:00 · 2.5 mm" (it's raining now)
+  - "Rain until 17:00 · 2.5 mm" (it rains from the start of the day, or now)
   - "Snow …" or "Sleet …" when the forecast says so
+- The day's wind is its strongest, with the direction it blows from then. Its
+  pressure and humidity are averages.
+- Met.no forecasts hourly for about two days, then every 6 hours. Days further
+  ahead show 6-hourly columns, and their rain bars are scaled per hour so they
+  compare with hourly days.
 - Met.no has no windy forecast. The card shows **Windy** when it's dry and the
   wind is a strong breeze or more: 10.8 m/s, 39 km/h, 24 mph.
 - The hourly forecast and rain chart share one panel and one row of times, so
-  each temperature and icon sits above that hour's rain. Turn on either or both.
+  each temperature and icon sits above that hour's rain.
 - The temperature line's height covers at least 8°C (14°F), so a day that
   barely changes looks nearly flat. The line never curves past the forecast values.
 - When the card is too narrow for every hour's temperature and icon, it labels
@@ -79,15 +84,11 @@ your Home Assistant theme:
 
 ## Examples
 
-### Everything
+### A week ahead
 
 ```yaml
 type: custom:weather-card
-has_details: true
-has_headline: true
-has_hourly_forecast: true
-has_rain_chart: true
-has_daily_forecast: true
+days: 7
 ```
 
 ### Another place, in imperial units
@@ -102,7 +103,6 @@ temperature_unit: F
 precipitation_unit: in
 pressure_unit: inHg
 wind_speed_unit: mph
-has_details: true
 ```
 
 ### Garden thermometer
@@ -111,5 +111,4 @@ has_details: true
 type: custom:weather-card
 name: Garden
 temperature_entity: sensor.outdoor_temperature
-has_rain_chart: true
 ```
