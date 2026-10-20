@@ -46,7 +46,7 @@ ha-card {
   color: var(--danger);
 }
 
-/* "Falling fast from Wed 15:00 · −6.2 hPa in 24 h" */
+/* "Falling fast from Wed 15:00 · −6.2 hPa in 24 h", or "Rising fast …" */
 .headline {
   display: flex;
   align-items: center;
@@ -58,7 +58,7 @@ ha-card {
 .headline .icon {
   opacity: var(--secondary-opacity);
 }
-.headline.falling .icon {
+.headline.likely .icon {
   opacity: 1;
   color: var(--danger);
 }
@@ -80,7 +80,7 @@ ha-card {
 }
 .plot {
   position: relative;
-  height: 120px;
+  height: 64px;
 }
 .plot svg {
   position: absolute;
@@ -107,7 +107,7 @@ ha-card {
 .past {
   opacity: var(--secondary-opacity);
 }
-/* Where the line would have to drop to for a likely migraine */
+/* Where the line would have to drop or rise to for a likely migraine */
 .threshold {
   fill: none;
   stroke: var(--danger);
@@ -222,33 +222,6 @@ ha-card {
   white-space: nowrap;
 }
 
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 16px;
-  font-size: 12px;
-}
-.legend > span {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.key {
-  width: 16px;
-  height: 8px;
-  flex: none;
-  overflow: visible;
-}
-.key line {
-  stroke: var(--danger);
-  stroke-width: 2px;
-  stroke-linecap: round;
-}
-.key-threshold line {
-  stroke-width: 1.5px;
-  stroke-dasharray: 3 4;
-  opacity: 0.6;
-}
 .message {
   font-size: var(--font-size-s);
 }

@@ -1,5 +1,5 @@
-import { ArrowDownRight, TriangleWarning } from "../../shared/icons.js";
-import { createRoot, css, icon, registerCard } from "../../shared/card.js";
+import { ArrowDownRight, ArrowUpRight, TriangleWarning } from "../../shared/icons.js";
+import { createRoot, css, registerCard } from "../../shared/card.js";
 import { smoothPath } from "../../shared/chart.js";
 import styles from "./styles.css?inline";
 
@@ -22,6 +22,9 @@ const DEFAULTS = {
   forecast_hours: 72,
   // A fall of this many hPa over 24 hours makes a migraine likely (Kimoto et al. 2011)
   migraine_drop: 5,
+  // A rise of this many hPa over 24 hours, for people whose migraines follow
+  // rises. Off, as Kimoto et al. found fewer migraines after rises, not more.
+  migraine_rise: false,
 };
 // Open-Meteo keeps about 92 days of past forecasts and looks 16 days ahead.
 // The card fetches 24 hours more than it shows, to know each hour's 24-hour change.
@@ -98,9 +101,11 @@ class PressureCard extends HTMLElement {
     ) {
       throw new Error(`forecast_hours must be a whole number from 1 to ${MAX_FORECAST_HOURS}`);
     }
-    const drop = config.migraine_drop;
-    if (drop != null && drop !== false && !(typeof drop === "number" && drop > 0)) {
-      throw new Error("migraine_drop must be a positive number of hPa, or false");
+    for (const key of ["migraine_drop", "migraine_rise"]) {
+      const v = config[key];
+      if (v != null && v !== false && !(typeof v === "number" && v > 0)) {
+        throw new Error(`${key} must be a positive number of hPa, or false`);
+      }
     }
     let unit;
     if (config.pressure_unit != null) {
@@ -196,7 +201,7 @@ class PressureCard extends HTMLElement {
           </div>
         </div>
         <div class="headline">
-          <span class="icon">${icon(ArrowDownRight)}</span><span class="text"></span><span class="extra secondary"></span>
+          <span class="icon"></span><span class="text"></span><span class="extra secondary"></span>
         </div>
         <div class="chart">
           <span class="now-label secondary">Now</span>
@@ -208,7 +213,8 @@ class PressureCard extends HTMLElement {
                 <clipPath id="likely"></clipPath>
               </defs>
               <g class="grid"></g>
-              <path class="threshold" vector-effect="non-scaling-stroke"></path>
+              <path class="threshold drop" vector-effect="non-scaling-stroke"></path>
+              <path class="threshold rise" vector-effect="non-scaling-stroke"></path>
               <g class="past" clip-path="url(#past)">
                 <path class="line" vector-effect="non-scaling-stroke"></path>
                 <path class="line likely" clip-path="url(#likely)" vector-effect="non-scaling-stroke"></path>
@@ -229,10 +235,6 @@ class PressureCard extends HTMLElement {
         <div class="axis secondary">
           <div class="times"></div>
           <div class="days"></div>
-        </div>
-        <div class="legend">
-          <span class="key-likely"><svg class="key" viewBox="0 0 16 8" aria-hidden="true"><line x1="2" y1="4" x2="14" y2="4"></line></svg><span class="secondary"></span></span>
-          <span class="key-threshold"><svg class="key" viewBox="0 0 16 8" aria-hidden="true"><line x1="2" y1="4" x2="14" y2="4"></line></svg><span class="secondary"></span></span>
         </div>
         <div class="message secondary"></div>
       </ha-card>`,
@@ -278,8 +280,10 @@ class PressureCard extends HTMLElement {
         ? clock
         : `${date.toLocaleDateString(lang, { weekday: "short" })} ${clock}`;
     };
-    const likely = (h) => !!c.migraine_drop && h.change != null && h.change <= -c.migraine_drop;
-    return { lang, unit, number, pressure, change, time, likely };
+    const falling = (h) => !!c.migraine_drop && h.change != null && h.change <= -c.migraine_drop;
+    const rising = (h) => !!c.migraine_rise && h.change != null && h.change >= c.migraine_rise;
+    const likely = (h) => falling(h) || rising(h);
+    return { lang, unit, number, pressure, change, time, falling, rising, likely };
   }
 
   _render() {
@@ -300,7 +304,7 @@ class PressureCard extends HTMLElement {
     const current = hours[nowIndex];
 
     const ready = hours.length >= 2 && !!current;
-    for (const el of [".now", ".headline", ".chart", ".axis", ".legend"]) $(el).hidden = !ready;
+    for (const el of [".now", ".headline", ".chart", ".axis"]) $(el).hidden = !ready;
     $(".message").textContent = !this._url()
       ? "Set latitude and longitude"
       : this._error
@@ -319,48 +323,61 @@ class PressureCard extends HTMLElement {
         ? ""
         : `${current.change <= -STEADY ? "Falling" : current.change >= STEADY ? "Rising" : "Steady"} · ${f.change(current.change)} ${unit.label} in 24 h`;
 
-    const migraine = !!c.migraine_drop;
+    const migraine = !!(c.migraine_drop || c.migraine_rise);
     const likelyNow = f.likely(current);
     $(".risk").hidden = !migraine;
     $(".level").classList.toggle("likely", likelyNow);
     $(".level .icon").replaceChildren(...(likelyNow ? [TriangleWarning({ weight: "Outline" })] : []));
     $(".level .text").textContent = likelyNow ? "Likely" : "Unlikely";
 
-    // Headline: when the next sharp fall is, in the hours ahead
+    // Headline: when the next sharp fall or rise is, in the hours ahead
     const ahead = hours.slice(nowIndex);
     $(".headline").hidden = !migraine;
     if (migraine) {
-      const fall = runs(ahead, f.likely)[0];
+      const fall = runs(ahead, f.falling)[0];
+      const rise = runs(ahead, f.rising)[0];
+      // Whichever comes first
+      const rising = !!rise && (!fall || rise[0] < fall[0]);
+      const spell = rising ? rise : fall;
       const span = `${c.forecast_hours} hour${c.forecast_hours === 1 ? "" : "s"}`;
-      let text = `No sharp falls in the next ${span}`;
+      const watched = [c.migraine_drop && "falls", c.migraine_rise && "rises"].filter(Boolean).join(" or ");
+      let text = `No sharp ${watched} in the next ${span}`;
       let extra = "";
-      if (fall) {
-        const [first, last] = fall;
+      if (spell) {
+        const [first, last] = spell;
         const end = ahead[last + 1];
+        const moving = rising ? "Rising fast" : "Falling fast";
         text =
           first > 0
-            ? `Falling fast from ${f.time(ahead[first].time)}`
+            ? `${moving} from ${f.time(ahead[first].time)}`
             : end
-              ? `Falling fast until ${f.time(end.time)}`
-              : `Falling fast for the next ${span}`;
-        const steepest = Math.min(...ahead.slice(first, last + 1).map((h) => h.change));
+              ? `${moving} until ${f.time(end.time)}`
+              : `${moving} for the next ${span}`;
+        const changes = ahead.slice(first, last + 1).map((h) => h.change);
+        const steepest = rising ? Math.max(...changes) : Math.min(...changes);
         extra = `${f.change(steepest)} ${unit.label} in 24 h`;
       }
-      $(".headline").classList.toggle("falling", !!fall);
+      $(".headline").classList.toggle("likely", !!spell);
+      $(".headline .icon").replaceChildren((rising ? ArrowUpRight : ArrowDownRight)({ weight: "Outline" }));
       $(".headline .text").textContent = text;
       $(".headline .extra").textContent = extra;
     }
 
-    // Each hour's migraine threshold: its pressure 24 hours before, less
-    // migraine_drop. The line is likely migraine weather wherever it's below.
-    const thresholds = hours.map((h) =>
-      migraine && h.change != null ? h.pressure - h.change - c.migraine_drop : null,
-    );
+    // Each hour's migraine thresholds: its pressure 24 hours before, less
+    // migraine_drop and plus migraine_rise. The line is likely migraine weather
+    // wherever it's below the first or above the second.
+    const threshold = (amount) =>
+      hours.map((h) => (amount && h.change != null ? h.pressure - h.change + amount : null));
+    const dropThresholds = threshold(c.migraine_drop && -c.migraine_drop);
+    const riseThresholds = threshold(c.migraine_rise);
 
     // Chart: x is hours from the first hour, y is 0 (top) to 100 (bottom).
-    // The range takes in the threshold too, so it's always in view.
+    // The range takes in the thresholds too, so they're always in view.
     const last = hours.length - 1;
-    const values = [...hours.map((h) => h.pressure), ...thresholds.filter((t) => t != null)];
+    const values = [
+      ...hours.map((h) => h.pressure),
+      ...[...dropThresholds, ...riseThresholds].filter((t) => t != null),
+    ];
     let low = Math.min(...values) - 1;
     let high = Math.max(...values) + 1;
     if (high - low < MIN_RANGE) {
@@ -388,10 +405,9 @@ class PressureCard extends HTMLElement {
       ),
     );
 
-    $(".threshold").setAttribute(
-      "d",
-      smoothPath(thresholds.flatMap((t, i) => (t == null ? [] : [[i, y(t)]]))),
-    );
+    const thresholdPath = (thresholds) => smoothPath(thresholds.flatMap((t, i) => (t == null ? [] : [[i, y(t)]])));
+    $(".threshold.drop").setAttribute("d", thresholdPath(dropThresholds));
+    $(".threshold.rise").setAttribute("d", thresholdPath(riseThresholds));
 
     // Grid lines on round values of the shown unit, labelled at the right.
     // Lines at the very top or bottom are left out, so their labels fit.
@@ -470,14 +486,6 @@ class PressureCard extends HTMLElement {
     for (const el of [".now-label", ".now-line", ".dot.current"]) $(el).style.left = `${percent(current.time)}%`;
     $(".dot.current").style.top = `${y(current.pressure)}%`;
     $(".dot.current").classList.toggle("likely", likelyNow);
-
-    // Legend, in the shown unit
-    if (c.migraine_drop) {
-      const drop = Number(unit.convert(c.migraine_drop).toFixed(unit.change)).toLocaleString(f.lang);
-      $(".key-likely > span").textContent = "Migraine likely";
-      $(".key-threshold > span").textContent = `${drop} ${unit.label} under 24 h before`;
-    }
-    $(".legend").hidden = !migraine;
 
     this._view = { hours, y, last, f };
   }

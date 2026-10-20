@@ -3,7 +3,7 @@
 Hourly air pressure from [Open-Meteo](https://open-meteo.com/) for a location:
 the last 40 hours and the next 72. It shows the pressure now and how much it
 has changed in 24 hours. It also marks the falls that tend to bring on
-migraines, and says when the next one is coming.
+migraines, and says when the next one is coming. It can mark sharp rises too.
 
 The card fetches the pressure itself, so no entity is needed. Open-Meteo is
 free and needs no API key.
@@ -22,25 +22,32 @@ type: custom:pressure-card
 | `longitude`      | number         | your home's                    | Longitude of the location.                                                  |
 | `past_hours`     | number         | `40`                           | Hours of the past the chart shows, up to 2160.                              |
 | `forecast_hours` | number         | `72`                           | Hours of forecast the chart shows, up to 383.                               |
-| `migraine_drop`  | number / false | `5`                            | Fall in hPa over 24 hours that makes a migraine likely. `false` hides the migraine risk, threshold and headline. |
+| `migraine_drop`  | number / false | `5`                            | Fall in hPa over 24 hours that makes a migraine likely. `false` stops marking falls. |
+| `migraine_rise`  | number / false | `false`                        | Rise in hPa over 24 hours that makes a migraine likely, if yours follow rises. See [Migraine levels](#migraine-levels). |
 | `pressure_unit`  | string         | `hPa`, or `inHg` if HA uses °F | `hPa`, `mbar`, `inHg` or `mmHg`.                                            |
 
 Without `latitude` and `longitude`, the card uses the home location set in
-Home Assistant (**Settings → System → General**). `migraine_drop` is always
-in hPa, whatever `pressure_unit` is. The unit value is not case-sensitive.
+Home Assistant (**Settings → System → General**). With both `migraine_drop`
+and `migraine_rise` set to `false`, the card hides the migraine risk,
+thresholds and headline. Both are always in hPa, whatever `pressure_unit` is. The unit value is not case-sensitive.
 
 ## Behavior
 
 - The pressure is at sea level, the figure weather forecasts and barometers
   give, so it's the same wherever your home is and however high.
 - **Migraine likely** means the pressure is at least `migraine_drop` hPa lower
-  than 24 hours before. The line turns red for those hours.
+  than 24 hours before, or, with `migraine_rise` set, at least that many hPa
+  higher. The line turns red for those hours.
 - The dashed red line is the pressure 24 hours before, less `migraine_drop`.
-  Wherever the pressure line drops below it, a migraine is likely.
-- The headline looks ahead over the forecast:
-  - "No sharp falls in the next 72 hours"
+  Wherever the pressure line drops below it, a migraine is likely. With
+  `migraine_rise` set, a second one sits above it, at the pressure 24 hours
+  before plus `migraine_rise`.
+- The headline looks ahead over the forecast, to whichever sharp fall or rise
+  comes first:
+  - "No sharp falls in the next 72 hours" ("falls or rises" with `migraine_rise`)
   - "Falling fast from Wed 15:00 · −7.2 hPa in 24 h" (the steepest fall in that spell)
   - "Falling fast until 21:00" (it's falling fast now)
+  - "Rising fast from Thu 03:00 · +6.1 hPa in 24 h" (with `migraine_rise`)
 - Under the reading, **Falling** or **Rising** means the pressure moved at
   least 1 hPa in 24 hours, otherwise **Steady**.
 - The past is dimmed. Open-Meteo's past hours are its weather model's, not a
@@ -69,6 +76,14 @@ Japan, link migraines to pressure **falling**, more than to pressure being low:
 
 So the card's default is a 5 hPa fall in 24 hours. People differ. If your
 migraines follow smaller or only bigger falls, change `migraine_drop`.
+
+Rises are off by default because the research doesn't back them. In the
+Kimoto diaries, migraines became **less** common when pressure rose more than
+5 hPa ([Kimoto et al. 2011](https://pubmed.ncbi.nlm.nih.gov/21921370/)). A
+[systematic review](https://pmc.ncbi.nlm.nih.gov/articles/PMC12617017/) of 14
+studies found the results mixed, with the links mostly to falls or rapid
+swings. Still, some people find their migraines follow a rise. If yours do, set
+`migraine_rise`, e.g. to `5`, and the card marks sharp rises the same way.
 
 ## Colors
 
@@ -99,6 +114,13 @@ forecast_hours: 120
 ```yaml
 type: custom:pressure-card
 migraine_drop: 3
+```
+
+### Rises too
+
+```yaml
+type: custom:pressure-card
+migraine_rise: 5
 ```
 
 ### Just the pressure

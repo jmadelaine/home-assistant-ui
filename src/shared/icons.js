@@ -4,6 +4,7 @@
 export {
   AlertCircle,
   ArrowDownRight,
+  ArrowUpRight,
   BellAlert,
   Bulb2,
   ChevronDown,
