@@ -59,7 +59,7 @@ ha-card {
 }
 .plot {
   position: relative;
-  height: 64px;
+  height: 48px;
 }
 .plot svg {
   position: absolute;
