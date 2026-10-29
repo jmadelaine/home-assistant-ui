@@ -4,7 +4,7 @@ import styles from "./styles.css?inline";
 
 const sheet = css(styles);
 
-const KEY_STEP = 5; // percent per arrow key on the slider
+const STEP = 5; // the slider moves in steps of this many percent
 // After a change, the slider keeps showing it until the light reports back,
 // so it doesn't jump to the old brightness in between
 const PENDING_FOR = 3000;
@@ -78,7 +78,7 @@ class LightCard extends HTMLElement {
   _bindSlider(slider) {
     const valueAt = (e) => {
       const { left, width } = slider.getBoundingClientRect();
-      return Math.round(clamp((e.clientX - left) / width, 0, 1) * 100);
+      return Math.round((clamp((e.clientX - left) / width, 0, 1) * 100) / STEP) * STEP;
     };
     const move = (e) => {
       if (e.pointerId === this._press?.id) this._showBrightness(valueAt(e));
@@ -114,12 +114,16 @@ class LightCard extends HTMLElement {
         return;
       }
       if (this._onOff) return;
+      // A brightness set elsewhere, like 37%, steps onto the grid: up to 40
+      // or down to 35
       const now = this._shownBrightness;
+      const up = (Math.floor(now / STEP) + 1) * STEP;
+      const down = (Math.ceil(now / STEP) - 1) * STEP;
       const next = {
-        ArrowRight: now + KEY_STEP,
-        ArrowUp: now + KEY_STEP,
-        ArrowLeft: now - KEY_STEP,
-        ArrowDown: now - KEY_STEP,
+        ArrowRight: up,
+        ArrowUp: up,
+        ArrowLeft: down,
+        ArrowDown: down,
         Home: 0,
         End: 100,
       }[e.key];

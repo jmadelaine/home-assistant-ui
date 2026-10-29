@@ -30,8 +30,8 @@ entity: light.bedroom
 - **Tap the sliders key** next to the name to open Home Assistant's dialog for
   the light. That's where you pick a color or one of your favorite colors,
   start an effect, or change its settings.
-- **Drag or tap the brightness bar.** The new brightness is sent when you let
-  go. Dragging all the way to the left turns the light off; dragging right from
+- **Drag or tap the brightness bar.** It moves in 5% steps, and the new
+  brightness is sent when you let go. Dragging all the way to the left turns the light off; dragging right from
   off turns it on at that brightness.
 - A vertical swipe on the bar scrolls the page rather than changing the brightness.
 - With a keyboard, **Enter** or **Space** on the bar toggles the light, the
